@@ -8,7 +8,6 @@ int main() {
     int max = p;
 
     while (runtime <= 2) {
-        printf("Coucou");
         clock_t start, end;
         int res;
 
@@ -18,9 +17,9 @@ int main() {
 
         runtime = ((double) (end - start)) / CLOCKS_PER_SEC;
 
-        if (res && runtime <= 2) {
+        if (res == TRUE && runtime <= 2) {
             max = p;
-            printf("max : %d\n", max);
+            //printf("max : %d\n", max);
         }
 
         ++p;

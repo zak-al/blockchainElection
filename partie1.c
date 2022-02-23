@@ -13,7 +13,7 @@ int is_prime_naive(long p) {
         return FALSE;
     }
 
-    for (int i = 3; i <= p; ++i) {
+    for (int i = 3; i < p; ++i) {
         if (p % i == 0) return FALSE;
     }
 
