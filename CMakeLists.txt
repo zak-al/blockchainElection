@@ -3,4 +3,4 @@ project(projetSTR C)
 
 set(CMAKE_C_STANDARD 99)
 
-add_executable(projetSTR main.c)
+add_executable(projetSTR main.c partie1.c partie1.h)
