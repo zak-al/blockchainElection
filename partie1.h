@@ -7,8 +7,10 @@
 
 #define TRUE (1 == 1)
 #define FALSE (!TRUE)
+#define mod %
 
 int is_prime_naive(long p);
 long modpow_naive(long base, long exponent, long n);
+long modpow(long base, long exponent, long n);
 
 #endif //PROJETSTR_PARTIE1_H
