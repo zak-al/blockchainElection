@@ -1,11 +1,11 @@
-main: main.o partie1.o
-	gcc main.o partie1.o -o main
+main: main.o primalite.o
+	gcc main.o primalite.o -o main
 
 main.o: main.c
 	gcc -Wall -c main.c
 
-partie1.o: partie1.c partie1.h
-	gcc -Wall -c partie1.c
+primalite.o: primalite.c primalite.h
+	gcc -Wall -c primalite.c
 
 clean:
 	rm -rf *.o
