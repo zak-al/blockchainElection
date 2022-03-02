@@ -17,9 +17,5 @@ long rand_long(long low, long up);
 
 int is_prime_miller(long p, int k);
 long random_prime_number(int low_size, int up_size, int k);
-long extended_gcd(long s, long t, long* u, long* v);
-void generate_key_values(long p, long q, long* n, long* s, long* u);
 
-long* encrypt(const char* chaine, long s, long n);
-char* decrypt(const long* chaine, size_t size, long u, long n);
 #endif //PROJETSTR_PRIMALITE_H
