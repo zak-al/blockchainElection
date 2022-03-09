@@ -7,7 +7,7 @@
 
 typedef struct {
     long val;
-    long n;
+    long nn;
 } Key;
 
 long extended_gcd(long s, long t, long* u, long* v);
