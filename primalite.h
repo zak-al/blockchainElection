@@ -8,6 +8,7 @@
 #define TRUE (1 == 1)
 #define FALSE (!TRUE)
 #define mod %
+#define iseven (% 2 == 0)
 
 int is_prime_naive(long p);
 long modpow_naive(long base, long exponent, long n);

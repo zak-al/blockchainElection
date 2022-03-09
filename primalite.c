@@ -79,13 +79,13 @@ int is_prime_miller(long p, int k) {
     long b = 0;
     long d = p - 1;
     while (!(d & 1)) { //tant que d n’est pas impair
-        d = d/2;
-        b=b+1;
+        d /= 2;
+        ++b;
     }
     // On genere k valeurs pour a, et on teste si c’est un temoin :
     long a;
     int i;
-    for (i = 0; i < k; i++) {
+    for (i = 0; i < k; ++i) {
         a = rand_long(2, p-1);
         if (witness(a, b, d, p)) {
             return 0;

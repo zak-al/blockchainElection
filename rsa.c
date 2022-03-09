@@ -2,20 +2,21 @@
 // Created by Zakarie Aloui on 01/03/2022.
 //
 
+#include <stdio.h>
 #include "rsa.h"
 
 long extended_gcd(long s, long t, long* u, long* v) {
-    if (t == 0) {
-        *u = 1;
-        *v = 0;
-        return s;
+    if (s == 0) {
+        *u = 0;
+        *v = 1;
+        return t;
     }
 
     long uPrim, vPrim;
-    long gcd = extended_gcd(t, s mod t, &uPrim, &vPrim);
-    *u = uPrim;
+    long gcd = extended_gcd(t mod s, s, &uPrim, &vPrim);
 
-    *v = uPrim - (s / t) * vPrim;
+    *u = vPrim - (t / s) * uPrim;
+    *v = uPrim;
 
     return gcd;
 }
@@ -43,10 +44,13 @@ void generate_key_values(long p, long q, long* n, long* s, long* u) {
     long _ = 0;
     do {
         _s = rand_long(0, t);
-        // todo vérifier pour _ dans l'appel à extended_gcd
-    } while (extended_gcd(_s, t, u, &_) == 1);
+    } while (extended_gcd(_s, t, u, &_) != 1);
 
     *s = _s;
+
+    if (*u < 0) {
+        *u += t;
+    }
 }
 
 /**
@@ -66,7 +70,7 @@ void generate_key_values(long p, long q, long* n, long* s, long* u) {
 long* encrypt(const char* string, long s, long n) {
     size_t len = strlen(string);
 
-    long* res = malloc(len * sizeof *res);
+    long* res = malloc(len * sizeof(long));
     if (!res) {
         return NULL;
     }
@@ -74,6 +78,8 @@ long* encrypt(const char* string, long s, long n) {
     for (size_t i = 0; i < len; ++i) {
         res[i] = modpow((long) string[i], s, n);
     }
+
+    return res;
 }
 
 /**

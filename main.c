@@ -2,11 +2,11 @@
 #include <time.h>
 #include <limits.h>
 #include "primalite.h"
-#include <math.h>
-#include <assert.h>
+#include "rsa.h"
 #include <stdlib.h>
 
 #define NB_TESTS 10000
+#define repeat(n) for(int __i = 0; __i < n; ++__i)
 
 long gros_premier() {
     //long p = 7926200;
@@ -94,11 +94,53 @@ void test_faux_positifs() {
     printf("en %f secondes.\n", tps);
 }
 
+void print_long_vector(long* result, size_t size) {
+    for (size_t i = 0; i < size - 1; ++i) {
+        printf("%lx; ", result[i]);
+    }
+
+    if (size != 0) {
+        printf("%lx", result[size - 1]);
+    }
+
+    printf("]");
+}
+
+void test_rsa() {
+    long p = random_prime_number(3, 7, 5000);
+    long q;
+    do {
+        q = random_prime_number(3, 7, 5000);
+    } while (q == p);
+
+    long n, s, u;
+    generate_key_values(p, q, &n, &s, &u);
+    // Le test de positivité des clés est effectué dans la fonction de génération.
+
+    printf("Clé publique : (%lx, %lx)\n", s, n);
+    printf("Clé privée : (%lx, %lx)\n", u, n);
+
+    printf("s * u [n] = %ld\n", (s * u) mod n);
+
+    char message[64] = "Coucou hibou caillou chou";
+    size_t len = strlen(message);
+    long* encrypted = encrypt(message, s, n);
+
+    printf("Message initilal : %s\n", message);
+    printf("Représentation chiffrée :\n");
+    print_long_vector(encrypted, len);
+    printf("\n");
+
+    char* decrypted = decrypt(encrypted, len, u, n);
+    printf("Decrypted : %s\n", decrypted);
+}
+
 int main() {
     srand(time(NULL));
     //test_modpow();
     //gros_premier();
     //printf("%ld\n", random_prime_number(31, 31, 4));
-    test_faux_positifs();
-    return 0;
+    //test_faux_positifs();
+
+    test_rsa();
 }
