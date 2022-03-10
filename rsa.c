@@ -5,6 +5,12 @@
 #include <stdio.h>
 #include "rsa.h"
 
+// todo remplacer les printf des messages d'erreur par des fprintf(stderr)
+
+size_t max(long x, long y) {
+    return x < y ? y : x;
+}
+
 long extended_gcd(long s, long t, long* u, long* v) {
     if (s == 0) {
         *u = 0;
@@ -112,3 +118,53 @@ char* decrypt(const long* string, size_t size, long u, long n) {
 
     return res;
 }
+
+void init_key(Key* key, long val, long n) {
+    key->val = val;
+    key->n = n;
+}
+
+// todo questionnement sur le type de low_size et up_size...
+void init_pair_keys(Key* pKey, Key* sKey, int low_size, int up_size) {
+    long pub_val, priv_val, n;
+    long p = random_prime_number(low_size, up_size, 5);
+    long q;
+    do {
+        q = random_prime_number(3, 7, 5000);
+    } while (q == p);
+
+    generate_key_values(p, q, &n, &pub_val, &priv_val);
+    init_key(pKey, pub_val, n);
+    init_key(sKey, priv_val, n);
+}
+
+char* key_to_str(Key* key) {
+    // Todo tester
+    // Le paramètre de malloc permet de faire une estimation de la taille espérée de la chaîne.
+    char* repr = malloc((max(key->n / 16 + 1, key->val / 16 + 1) + 5) * 2);
+    if (!repr) {
+        printf("[key_to_str] Erreur lors l'allocation de la représentation de la clé :(\n");
+        return NULL;
+    }
+
+    sprintf(repr, "(%lx, %lx)", key->val, key->n);
+    realloc(repr, strlen(repr) + 1);
+
+    return repr;
+}
+
+Key* str_to_key(char* repr) {
+    // todo tester
+    long val, n;
+    sscanf(repr, "(%lx, %lx)", &val, &n);
+    Key* key = malloc(sizeof(Key));
+    if (!key) {
+        printf("[str_to_key] Erreur lors l'allocation de la clé :(\n");
+        return NULL;
+    }
+
+    init_key(key, val, n);
+    return key;
+}
+
+

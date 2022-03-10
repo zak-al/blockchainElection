@@ -10,15 +10,17 @@ typedef struct {
     long n;
 } Key;
 
+size_t max(long x, long y);
+
 long extended_gcd(long s, long t, long* u, long* v);
 void generate_key_values(long p, long q, long* n, long* s, long* u);
 
 long* encrypt(const char* string, long s, long n);
 char* decrypt(const long* string, size_t size, long u, long n);
 
-void init_key(Key* key, long val, long n) {
-    key->val = val;
-    key->n = n;
-}
+void init_key(Key* key, long val, long n);
+void init_pair_keys(Key* pKey, Key* sKey, int low_size, int up_size);
+char* key_to_str(Key* key);
+Key* str_to_key(char* repr);
 
 #endif //PROJETSTR_RSA_H
