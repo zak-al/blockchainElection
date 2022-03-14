@@ -14,8 +14,17 @@ typedef struct {
     size_t length;
 } Signature;
 
-Signature* init_signature(long* content, size_t size);
+typedef struct {
+    Key* votersPublicKey;
+    char* message;
+    Signature* signature;
+} Protected;
 
+Signature* init_signature(long* content, size_t size);
 Signature* sign(char* mess, Key* sKey);
+char* signature_to_str(Signature* sgn);
+Signature* str_to_siganture(char* str);
+Protected* init_protected(Key* pKey, char* mess, Signature* sgn);
+int verify(Protected* pr);
 
 #endif //PROJETSTR_VOTING_H

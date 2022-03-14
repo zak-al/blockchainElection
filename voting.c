@@ -22,7 +22,7 @@ Signature* sign(char* mess, Key* sKey) {
     return init_signature(signature_content, strlen(mess));
 }
 
-char* signature_to_str (Signature* sgn) {
+char* signature_to_str(Signature* sgn) {
     char *result = malloc(10 * sgn->length * sizeof(char));
     result[0] = '#';
     int pos = 1;
@@ -56,6 +56,7 @@ Signature* str_to_siganture(char* str) {
         } else {
             if (pos != 0) {
                 buffer[pos] = '\0';
+
                 sscanf(buffer, "%lx", &(content[num]));
                 num = num + 1;
                 pos = 0;
@@ -64,4 +65,26 @@ Signature* str_to_siganture(char* str) {
     }
     content = realloc(content, num * sizeof(long));
     return init_signature(content, num);
+}
+
+Protected* init_protected(Key* pKey, char* mess, Signature* sgn) {
+    Protected* result = malloc(sizeof(Protected));
+
+    if (!result) {
+        fprintf(stderr, "[init_protected] Erreur lors de l'allocation de Protected :(\n");
+        return NULL;
+    }
+
+    result->signature = sgn;
+    result->message = strdup(mess);
+    result->votersPublicKey = pKey;
+
+    return result;
+}
+
+int verify(Protected* pr) {
+    char* decrypted = decrypt(pr->signature->content, pr->signature->length, pr->votersPublicKey->val, pr->votersPublicKey->n);
+    int res = strcmp(decrypted, pr->message) == 0 ? TRUE : FALSE;
+    free(decrypted);
+    return res;
 }
