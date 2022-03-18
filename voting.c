@@ -90,18 +90,18 @@ int verify(Protected* pr) {
 }
 
 char* protected_to_str(Protected* p){
-    char *res = malloc( 256* sizeof(char));
-    if (!res) {
+    char *p_res = malloc( 256* sizeof(char));
+    if (!p_res) {
         fprintf(stderr, "[init_protected] Erreur lors de l'allocation :(\n");
         return NULL;
     }
     char *str_key = key_to_str(p->votersPublicKey);
     char *str_sgn = signature_to_str(p->signature);
 
-    sprintf(res, "%s, %s, %s\n", str_key, p->message, str_sgn);
+    sprintf(p_res, "%s, %s, %s\n", str_key, p->message, str_sgn);
 
     free(str_key);
     free(str_sgn);
 
-    return res;
+    return p_res;
 }
