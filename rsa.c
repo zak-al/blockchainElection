@@ -5,8 +5,6 @@
 #include <stdio.h>
 #include "rsa.h"
 
-// todo remplacer les printf des messages d'erreur par des fprintf(stderr)
-
 size_t max(long x, long y) {
     return x < y ? y : x;
 }
@@ -78,6 +76,7 @@ long* encrypt(const char* string, long s, long n) {
 
     long* res = malloc(len * sizeof(long));
     if (!res) {
+        fprintf(stderr,"erreur de l'allocation\n");
         return NULL;
     }
 
@@ -108,7 +107,10 @@ long* encrypt(const char* string, long s, long n) {
 char* decrypt(const long* string, size_t size, long u, long n) {
     char* res = malloc((size + 1) * sizeof *res);
 
-    if (!res) return NULL;
+    if (!res) {
+        fprintf(stderr,"erreur de l'allocation\n");
+        return NULL;
+    }
 
     for (size_t i = 0; i < size; ++i) {
         res[i] = (char) modpow(string[i], u, n);
@@ -143,7 +145,7 @@ char* key_to_str(Key* key) {
     // Le paramètre de malloc permet de faire une estimation de la taille espérée de la chaîne.
     char* repr = malloc((max(key->n / 16 + 1, key->val / 16 + 1) + 5) * 2);
     if (!repr) {
-        printf("[key_to_str] Erreur lors l'allocation de la représentation de la clé :(\n");
+        fprintf(stderr, "[] Erreur lors l'allocation de la représentation de la clé :(\n");
         return NULL;
     }
 
@@ -159,7 +161,7 @@ Key* str_to_key(char* repr) {
     sscanf(repr, "(%lx, %lx)", &val, &n);
     Key* key = malloc(sizeof(Key));
     if (!key) {
-        printf("[str_to_key] Erreur lors l'allocation de la clé :(\n");
+        fprintf(stderr, "[str_to_key] Erreur lors l'allocation de la clé :(\n");
         return NULL;
     }
 
