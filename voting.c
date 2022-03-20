@@ -83,14 +83,17 @@ Protected* init_protected(Key* pKey, char* mess, Signature* sgn) {
 }
 
 int verify(Protected* pr) {
-    char* decrypted = decrypt(pr->signature->content, pr->signature->length, pr->votersPublicKey->val, pr->votersPublicKey->n);
+    char* decrypted = decrypt(pr->signature->content,
+                              pr->signature->length,
+                              pr->votersPublicKey->val,
+                              pr->votersPublicKey->n);
     int res = strcmp(decrypted, pr->message) == 0 ? TRUE : FALSE;
     free(decrypted);
     return res;
 }
 
 char* protected_to_str(Protected* p){
-    char *p_res = malloc( 256* sizeof(char));
+    char *p_res = malloc(256 * sizeof(char));
     if (!p_res) {
         fprintf(stderr, "[init_protected] Erreur lors de l'allocation :(\n");
         return NULL;
@@ -102,6 +105,8 @@ char* protected_to_str(Protected* p){
 
     free(str_key);
     free(str_sgn);
+
+    p_res = realloc(p_res, (strlen(p_res) + 1) * sizeof(char));
 
     return p_res;
 }
