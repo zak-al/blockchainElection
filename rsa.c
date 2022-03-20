@@ -65,7 +65,8 @@ void generate_key_values(long p, long q, long* n, long* s, long* u) {
  * @param n paramètre n de la clé publique (modulo)
  * @return un tableau de long contenant la version chiffrée de chaque caractère
  *
- * \~english Encrypts a string
+ * \~english
+ * @brief Encrypts a string
  * @param string string to encrypt
  * @param s public key
  * @param n parameter n of the public key (modulo)
@@ -169,4 +170,6 @@ Key* str_to_key(char* repr) {
     return key;
 }
 
-
+void freeKey(Key* key) {
+    free(key);
+}

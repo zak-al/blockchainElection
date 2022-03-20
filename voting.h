@@ -27,4 +27,7 @@ Signature* str_to_siganture(char* str);
 Protected* init_protected(Key* pKey, char* mess, Signature* sgn);
 int verify(Protected* pr);
 
+void freeSignature(Signature* signature);
+void freeProtected(Protected* protected);
+
 #endif //PROJETSTR_VOTING_H

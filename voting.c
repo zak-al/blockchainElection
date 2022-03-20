@@ -42,7 +42,6 @@ char* signature_to_str(Signature* sgn) {
     return result;
 }
 
-
 Signature* str_to_siganture(char* str) {
     size_t len = strlen(str);
     long *content = (long *) malloc(sizeof(long) * len);
@@ -108,4 +107,21 @@ char* protected_to_str(Protected* p){
     p_res = realloc(p_res, (strlen(p_res) + 1) * sizeof(char));
 
     return p_res;
+}
+
+void freeSignature(Signature* signature) {
+    if (signature) {
+        free(signature->content);
+    }
+    free(signature);
+}
+
+void freeProtected(Protected* protected) {
+    if (protected) {
+        free(protected->message);
+        freeSignature(protected->signature);
+        freeKey(protected->votersPublicKey);
+    }
+
+    free(protected);
 }
