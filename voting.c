@@ -42,7 +42,7 @@ char* signature_to_str(Signature* sgn) {
     return result;
 }
 
-Signature* str_to_siganture(char* str) {
+Signature* str_to_signature(char* str) {
     size_t len = strlen(str);
     long *content = (long *) malloc(sizeof(long) * len);
     int num = 0;
@@ -124,4 +124,117 @@ void freeProtected(Protected* protected) {
     }
 
     free(protected);
+}
+
+void delete_cell_key(CellKey* cellKey) {
+    if (! cellKey) return;
+    freeKey(cellKey->data);
+    free(cellKey);
+}
+
+void delete_list_keys(CellKey* cellKey) {
+    while (cellKey) {
+        CellKey* next = cellKey->next;
+        delete_cell_key(cellKey);
+        cellKey = next;
+    }
+}
+
+CellKey* create_cell_key(Key* key) {
+    CellKey* cellKey = malloc(sizeof(CellKey));
+    if (!cellKey) {
+        fprintf(stderr, "[create_cell_key] Erreur lors de l'allocation de la mémoire :(");
+        return NULL;
+    }
+
+    cellKey->data = key;
+    cellKey->next = NULL;
+
+    return cellKey;
+}
+
+/**
+ * @brief Crée une nouvelle liste en ajoutant une cellule contenant le clé passée en paramètre en tête de la liste passée.
+ * @param key Clé contenue dans la future tête de la liste.
+ * @param list Liste à laquelle ajouter la nouvelle cellule.
+ * @return Liste mise à jour.
+ */
+CellKey* prependKey(Key* key, CellKey* list) {
+    CellKey* cellKey = create_cell_key(key);
+    if (!cellKey) {
+        fprintf(stderr, "[prependKey] Erreur lors de l'allocation de la mémoire de la nouvelle cellule :(");
+        return list;
+    }
+
+    cellKey->next = list;
+    return cellKey;
+}
+
+CellKey* read_public_keys(char* filename) {
+    CellKey* list = NULL;
+
+    FILE* file = fopen(filename, "w");
+    char str[256];
+    while (fgets(str, 255, file)) {
+        Key* key = str_to_key(str);
+        list = prependKey(key, list);
+        freeKey(key);
+        key = NULL;
+    }
+
+    return list;
+}
+
+void print_list_keys(CellKey* list) {
+    while (list) {
+        printf("%s\n", key_to_str(list->data));
+        list = list->next;
+    }
+}
+
+CellProtected* create_cell_protected(Protected* pr) {
+    CellProtected* cellProtected = malloc(sizeof(CellProtected));
+
+    if (!cellProtected) {
+        fprintf(stderr, "[create_cell_protected] Erreur lors de l'allocation de la mémoire :(");
+        return NULL;
+    }
+
+    cellProtected->data = pr;
+    cellProtected->next = NULL;
+
+    return cellProtected;
+}
+
+CellProtected* prependProtected(Protected* protected, CellProtected* list) {
+    CellProtected* cellProtected = create_cell_protected(protected);
+    if (!cellProtected) {
+        fprintf(stderr, "[prependProtected] Erreur lors de l'allocation de la mémoire de la nouvelle cellule :(");
+        return list;
+    }
+
+    cellProtected->next = list;
+    return cellProtected;
+}
+
+CellProtected* read_protected() {
+    CellProtected* list = NULL;
+
+    FILE* file = fopen("declarations.txt", "w");
+    char str[256];
+    while (fgets(str, 255, file)) {
+        Protected* protected = str_to_protected(str);
+        list = prependProtected(protected, list);
+        freeProtected(protected);
+        protected = NULL;
+    }
+
+    return list;
+}
+
+void print_list_protected(CellProtected* list){
+    while (list){
+        printf("%s \n", protected_to_str(list->data));
+        list = list->next;
+    }
 }
