@@ -36,6 +36,7 @@ typedef struct cellProtected {
 
 Signature* init_signature(long* content, size_t size);
 Signature* sign(char* mess, Key* sKey);
+
 char* signature_to_str(Signature* sgn);
 Signature* str_to_signature(char* str);
 

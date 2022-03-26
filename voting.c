@@ -93,7 +93,7 @@ int verify(Protected* pr) {
 char* protected_to_str(Protected* p){
     char *p_res = malloc(256 * sizeof(char));
     if (!p_res) {
-        fprintf(stderr, "[init_protected] Erreur lors de l'allocation :(\n");
+        fprintf(stderr, "[protected_to_str] Erreur lors de l'allocation :(\n");
         return NULL;
     }
     char *str_key = key_to_str(p->votersPublicKey);
@@ -108,6 +108,52 @@ char* protected_to_str(Protected* p){
 
     return p_res;
 }
+
+Protected* str_to_protected(char* str){
+    char str_key[256];
+    char str_sgn[256];
+    char str_msg[256];
+    sscanf(str, "%s, %s, %s", str_key, str_msg, str_sgn);
+
+    Key* key= str_to_key(str_key);
+    Signature * sgn = str_to_signature(str_sgn);
+
+    return init_protected(key,str_msg,sgn);
+}
+
+void generate_random_data(int nv, int nc) {
+    FILE* fkeys = fopen("keys.txt","w+");
+    FILE* fcans = fopen("candidates.txt","w+");
+    FILE* fdecs = fopen("declarations.txt","w");
+
+    //todo le tableau de hachage pour obtenir nc candidates à Zakarie
+    char* pKeyC = NULL;
+    char* sKeyC = NULL;
+    Key* pKey = malloc(sizeof(Key));
+    Key* sKey = malloc(sizeof(Key));
+    int i;
+
+    for(i=0; i<nv;i++){
+        init_pair_keys(pKey, sKey,3,7);
+
+        pKeyC = strdup(key_to_str(pKey));
+        sKeyC = strdup(key_to_str(sKey));
+
+        fprintf(fkeys, "%s, %s \n", pKeyC, sKeyC);
+    }
+
+    for(i=0; i<nc; i++){
+        sscanf(fkeys, "%s, %s", pKeyC,sKeyC);
+        fprintf(fcans, "%s \n",pKeyC);
+    }
+
+    free(pKeyC);
+    free(sKeyC);
+    freeKey(pKey);
+    freeKey(sKey);
+
+}
+
 
 void freeSignature(Signature* signature) {
     if (signature) {
@@ -125,6 +171,8 @@ void freeProtected(Protected* protected) {
 
     free(protected);
 }
+
+
 
 void delete_cell_key(CellKey* cellKey) {
     if (! cellKey) return;
