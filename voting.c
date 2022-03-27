@@ -301,6 +301,7 @@ void delete_list_protected(CellProtected* cellProtected) {
     }
 }
 
+//exo6.1
 void delete_liste_fraude(CellProtected* cellProtected){
     while (cellProtected){
         CellProtected* next = cellProtected -> next;
