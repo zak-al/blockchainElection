@@ -221,7 +221,7 @@ CellKey* prependKey(Key* key, CellKey* list) {
 CellKey* read_public_keys(char* filename) {
     CellKey* list = NULL;
 
-    FILE* file = fopen(filename, "w");
+    FILE* file = fopen(filename, "r");
     char str[256];
     while (fgets(str, 255, file)) {
         Key* key = str_to_key(str);
@@ -284,5 +284,29 @@ void print_list_protected(CellProtected* list){
     while (list){
         printf("%s \n", protected_to_str(list->data));
         list = list->next;
+    }
+}
+
+void delete_cell_protected(CellProtected* cellProtected){
+    if (! cellProtected) return;
+    freeProtected(cellProtected->data);
+    free(cellProtected);
+}
+
+void delete_list_protected(CellProtected* cellProtected) {
+    while (cellProtected) {
+        CellProtected * next = cellProtected->next;
+        delete_cell_protected(cellProtected);
+        cellProtected = next;
+    }
+}
+
+void delete_liste_fraude(CellProtected* cellProtected){
+    while (cellProtected){
+        CellProtected* next = cellProtected -> next;
+        if(!verify(cellProtected->data)){
+            delete_cell_protected(cellProtected);
+        }
+        cellProtected = next;
     }
 }
