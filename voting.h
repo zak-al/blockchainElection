@@ -66,4 +66,8 @@ CellProtected* read_protected();
 
 void print_list_protected(CellProtected* list);
 
+void delete_cell_protected(CellProtected* cellProtected);
+void delete_list_protected(CellProtected* cellProtected);
+void delete_liste_fraude(CellProtected* cellProtected);
+
 #endif //PROJETSTR_VOTING_H
