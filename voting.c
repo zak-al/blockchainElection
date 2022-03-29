@@ -120,7 +120,7 @@ Protected* str_to_protected(char* str){
 
     return init_protected(key,str_msg,sgn);
 }
-
+/*
 void generate_random_data(int nv, int nc) {
     FILE* fkeys = fopen("keys.txt","w+");
     FILE* fcans = fopen("candidates.txt","w+");
@@ -143,7 +143,7 @@ void generate_random_data(int nv, int nc) {
     }
 
     for(i=0; i<nc; i++){
-        sscanf(fkeys, "%s, %s", pKeyC,sKeyC);
+        sscanf("keys.txt", "%s, %s", pKeyC,sKeyC);
         fprintf(fcans, "%s \n",pKeyC);
     }
 
@@ -153,7 +153,7 @@ void generate_random_data(int nv, int nc) {
     freeKey(sKey);
 
 }
-
+*/
 
 void freeSignature(Signature* signature) {
     if (signature) {
@@ -175,7 +175,7 @@ void freeProtected(Protected* protected) {
 
 
 void delete_cell_key(CellKey* cellKey) {
-    if (! cellKey) return;
+    if (!cellKey) return;
     freeKey(cellKey->data);
     free(cellKey);
 }
@@ -287,27 +287,27 @@ void print_list_protected(CellProtected* list){
     }
 }
 
-void delete_cell_protected(CellProtected* cellProtected){
-    if (! cellProtected) return;
-    freeProtected(cellProtected->data);
-    free(cellProtected);
+void delete_cell_protected(CellProtected** cellProtected){
+    if (! *cellProtected) return;
+    freeProtected((*cellProtected)->data);
+    free(*cellProtected);
 }
 
-void delete_list_protected(CellProtected* cellProtected) {
-    while (cellProtected) {
-        CellProtected * next = cellProtected->next;
+void delete_list_protected(CellProtected** cellProtected) {
+    while (*cellProtected) {
+        CellProtected * next = (*cellProtected)->next;
         delete_cell_protected(cellProtected);
-        cellProtected = next;
+        *cellProtected = next;
     }
 }
 
 //exo6.1
-void delete_liste_fraude(CellProtected* cellProtected){
-    while (cellProtected){
-        CellProtected* next = cellProtected -> next;
-        if(!verify(cellProtected->data)){
+void delete_liste_fraude(CellProtected** cellProtected){
+    while (*cellProtected){
+        CellProtected* next = (*cellProtected) -> next;
+        if(!verify((*cellProtected) -> data)){
             delete_cell_protected(cellProtected);
         }
-        cellProtected = next;
+        *cellProtected = next;
     }
 }

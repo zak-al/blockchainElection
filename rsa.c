@@ -151,7 +151,7 @@ char* key_to_str(Key* key) {
     }
 
     sprintf(repr, "(%lx, %lx)", key->val, key->n);
-    realloc(repr, strlen(repr) + 1);
+    //realloc(repr, strlen(repr) + 1);
 
     return repr;
 }
