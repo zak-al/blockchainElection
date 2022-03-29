@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "rsa.h"
+#include "hashset.h"
 
 /**
  * A signature is characterised by an array of integers and its length.
@@ -34,13 +35,19 @@ typedef struct cellProtected {
     struct cellProtected* next;
 } CellProtected;
 
-Signature* init_signature(long* content, size_t size);
+int signaturesEqual(Signature* s1, Signature* s2);
+int protectedEqual(Protected* p1, Protected* p2);
+
+long* copy_long_array(long* array, size_t size);
+Signature* copySignature(Signature* signature);
+
+Signature* init_signature(long *content, size_t size);
 Signature* sign(char* mess, Key* sKey);
 
 char* signature_to_str(Signature* sgn);
 Signature* str_to_signature(char* str);
 
-Protected* init_protected(Key* pKey, char* mess, Signature* sgn);
+Protected* init_protected(Key* votersPublicKey, char* mess, Signature* sgn);
 int verify(Protected* pr);
 
 void freeSignature(Signature* signature);

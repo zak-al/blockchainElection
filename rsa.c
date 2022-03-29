@@ -1,9 +1,16 @@
-//
-// Created by Zakarie Aloui on 01/03/2022.
-//
-
 #include <stdio.h>
 #include "rsa.h"
+
+int keysEqual(Key* x, Key* y) {
+    return (x->n == y->n && x->val == y->val);
+}
+
+Key* copyKey(Key* key) {
+    Key* copy = malloc(sizeof(Key));
+    copy->n = key->n;
+    copy->val = key->val;
+    return copy;
+}
 
 size_t max(long x, long y) {
     return x < y ? y : x;
@@ -146,12 +153,12 @@ char* key_to_str(Key* key) {
     // Le paramètre de malloc permet de faire une estimation de la taille espérée de la chaîne.
     char* repr = malloc((max(key->n / 16 + 1, key->val / 16 + 1) + 5) * 2);
     if (!repr) {
-        fprintf(stderr, "[] Erreur lors l'allocation de la représentation de la clé :(\n");
+        fprintf(stderr, "[key_to_str] Erreur lors l'allocation de la représentation de la clé :(\n");
         return NULL;
     }
 
     sprintf(repr, "(%lx, %lx)", key->val, key->n);
-    realloc(repr, strlen(repr) + 1);
+    repr = realloc(repr, strlen(repr) + 1);
 
     return repr;
 }

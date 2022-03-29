@@ -14,4 +14,6 @@ long rand_long(long low, long up);
 int is_prime_miller(long p, int k);
 long random_prime_number(int low_size, int up_size, int k);
 
+long long next_prime(long long from);
+
 #endif //PROJETSTR_PRIMALITE_H

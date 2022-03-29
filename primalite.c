@@ -3,8 +3,6 @@
 //
 
 #include <stdlib.h>
-#include <printf.h>
-#include <string.h>
 #include "primalite.h"
 
 int is_prime_naive(long p) {
@@ -105,6 +103,22 @@ long random_prime_number(int low_size, int up_size, int k) {
     do {
         p = rand_long(lo, hi);
     } while (!is_prime_miller(p, k));
+
+    return p;
+}
+
+/**
+ * TODO REMOVE
+ * Gives the least prime number greater than the input.
+ * @param from An odd prime number.
+ * @return A prime number greater than `from`.
+ */
+long long next_prime(long long from) {
+    // todo tester
+    long long p = from + 2;
+    while (!is_prime_miller(p, 1)) {
+        p += 2;
+    }
 
     return p;
 }
