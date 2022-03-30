@@ -1,7 +1,3 @@
-//
-// Created by Zakarie Aloui on 23/02/2022.
-//
-
 #include <stdlib.h>
 #include "primalite.h"
 
@@ -48,7 +44,7 @@ long modpow(long base, long exponent, long n) {
 }
 
 int witness(long a, long b, long d, long p) {
-    long x = modpow(a,d,p);
+    long x = modpow(a, d, p);
     if (x == 1) {
         return 0;
     }
@@ -84,7 +80,7 @@ int is_prime_miller(long p, int k) {
     long a;
     int i;
     for (i = 0; i < k; ++i) {
-        a = rand_long(2, p-1);
+        a = rand_long(2, p - 1);
         if (witness(a, b, d, p)) {
             return 0;
         }
@@ -103,22 +99,6 @@ long random_prime_number(int low_size, int up_size, int k) {
     do {
         p = rand_long(lo, hi);
     } while (!is_prime_miller(p, k));
-
-    return p;
-}
-
-/**
- * TODO REMOVE
- * Gives the least prime number greater than the input.
- * @param from An odd prime number.
- * @return A prime number greater than `from`.
- */
-long long next_prime(long long from) {
-    // todo tester
-    long long p = from + 2;
-    while (!is_prime_miller(p, 1)) {
-        p += 2;
-    }
 
     return p;
 }

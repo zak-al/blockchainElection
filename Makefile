@@ -1,9 +1,3 @@
-main: main.o primalite.o
-	gcc main.o primalite.o -o main
-
-main.o: main.c
-	gcc -Wall -c main.c
-
 tests: tests.o voting.o hashset.o rsa.o primalite.o
 	gcc tests.o voting.o rsa.o hashset.o primalite.o -o tests
 

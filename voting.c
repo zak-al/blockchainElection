@@ -1,6 +1,36 @@
 #include "voting.h"
 
-int signaturesEqual(Signature* s1, Signature* s2) {
+/*
+ * =========== MÉTHODES DE SIGNATURE ===========
+ */
+
+long *copyLongArray(const long *array, size_t size) {
+    long *copy = malloc(size * sizeof(long));
+    if (!copy) {
+        fprintf(stderr, "[copyLongArray] Erreur lors l'allocation :(\n");
+        return NULL;
+    }
+
+    for (size_t i = 0; i < size; ++i) {
+        copy[i] = array[i];
+    }
+
+    return copy;
+}
+
+void printLongVector(long *result, size_t size) {
+    for (size_t i = 0; i < size - 1; ++i) {
+        printf("%lx; ", result[i]);
+    }
+
+    if (size != 0) {
+        printf("%lx", result[size - 1]);
+    }
+
+    printf("]");
+}
+
+int signaturesEqual(Signature *s1, Signature *s2) {
     if (s1->length != s2->length) return FALSE;
 
     for (int i = 0; i < s1->length; ++i) {
@@ -10,45 +40,31 @@ int signaturesEqual(Signature* s1, Signature* s2) {
     return TRUE;
 }
 
-int protectedEqual(Protected* p1, Protected* p2) {
-    return strcmp(p1->message, p2->message) == 0 && keysEqual(p1->votersPublicKey, p2->votersPublicKey) &&
-            signaturesEqual(p1->signature, p2->signature);
-}
-
-long* copy_long_array(long* array, size_t size) {
-    long* copy = malloc(size * sizeof(long));
-    for (size_t i = 0; i < size; ++i) {
-        copy[i] = array[i];
-    }
-
-    return copy;
-}
-
-Signature* init_signature(long* content, size_t size) {
-    Signature* signature = malloc(sizeof(Signature));
+Signature *initSignature(const long *content, size_t size) {
+    Signature *signature = malloc(sizeof(Signature));
     if (!signature) {
-        fprintf(stderr, "[init_signature] : erreur lors de l'allocation de la signature :(\n");
+        fprintf(stderr, "[initSignature] : erreur lors de l'allocation de la signature :(\n");
         return NULL;
     }
 
-    signature->content = copy_long_array(content, size);
+    signature->content = copyLongArray(content, size);
     signature->length = size;
 
     return signature;
 }
 
-Signature* copySignature(Signature* signature) {
-    return init_signature(signature->content, signature->length);
+Signature *copySignature(Signature *signature) {
+    return initSignature(signature->content, signature->length);
 }
 
-Signature* sign(char* mess, Key* sKey) {
-    long* signature_content = encrypt(mess, sKey->val, sKey->n);
-    Signature* res = init_signature(signature_content, strlen(mess));
+Signature *sign(const char *mess, const Key *sKey) {
+    long *signature_content = encrypt(mess, sKey->val, sKey->n);
+    Signature *res = initSignature(signature_content, strlen(mess));
     free(signature_content);
     return res;
 }
 
-char* signature_to_str(Signature* sgn) {
+char *signature_to_str(Signature *sgn) {
     char *result = malloc(10 * sgn->length * sizeof(char));
     result[0] = '#';
     int pos = 1;
@@ -68,7 +84,7 @@ char* signature_to_str(Signature* sgn) {
     return result;
 }
 
-Signature* str_to_signature(char* str) {
+Signature *str_to_signature(char *str) {
     size_t len = strlen(str);
     long *content = (long *) malloc(sizeof(long) * len);
     int num = 0;
@@ -88,11 +104,27 @@ Signature* str_to_signature(char* str) {
         }
     }
     content = realloc(content, num * sizeof(long));
-    return init_signature(content, num);
+    return initSignature(content, num);
 }
 
-Protected* init_protected(Key* votersPublicKey, char* mess, Signature* sgn) {
-    Protected* result = malloc(sizeof(Protected));
+void freeSignature(Signature *signature) {
+    if (signature) {
+        free(signature->content);
+    }
+    free(signature);
+}
+
+/*
+ * =========== MÉTHODES DE PROTECTED ===========
+ */
+
+int protectedEqual(Protected *p1, Protected *p2) {
+    return strcmp(p1->message, p2->message) == 0 && keysEqual(p1->votersPublicKey, p2->votersPublicKey) &&
+           signaturesEqual(p1->signature, p2->signature);
+}
+
+Protected *init_protected(Key *votersPublicKey, char *mess, Signature *sgn) {
+    Protected *result = malloc(sizeof(Protected));
 
     if (!result) {
         fprintf(stderr, "[init_protected] Erreur lors de l'allocation de Protected :(\n");
@@ -106,8 +138,8 @@ Protected* init_protected(Key* votersPublicKey, char* mess, Signature* sgn) {
     return result;
 }
 
-int verify(Protected* pr) {
-    char* decrypted = decrypt(pr->signature->content,
+int verify(Protected *pr) {
+    char *decrypted = decrypt(pr->signature->content,
                               pr->signature->length,
                               pr->votersPublicKey->val,
                               pr->votersPublicKey->n);
@@ -116,7 +148,7 @@ int verify(Protected* pr) {
     return res;
 }
 
-char* protected_to_str(Protected* p){
+char *protected_to_str(Protected *p) {
     char *p_res = malloc(256 * sizeof(char));
     if (!p_res) {
         fprintf(stderr, "[protected_to_str] Erreur lors de l'allocation :(\n");
@@ -125,7 +157,7 @@ char* protected_to_str(Protected* p){
     char *str_key = key_to_str(p->votersPublicKey);
     char *str_sgn = signature_to_str(p->signature);
 
-    sprintf(p_res, "%s:%s:%s\n", str_key, p->message, str_sgn);
+    sprintf(p_res, "%s:%s:%s", str_key, p->message, str_sgn);
 
     free(str_key);
     free(str_sgn);
@@ -135,8 +167,7 @@ char* protected_to_str(Protected* p){
     return p_res;
 }
 
-Protected* str_to_protected(char* str) {
-    // todo tester
+Protected *str_to_protected(char *str) {
     char str_key[256];
     char str_sgn[256];
     char str_msg[256];
@@ -145,7 +176,7 @@ Protected* str_to_protected(char* str) {
     Key *key = str_to_key(str_key);
     Signature *sgn = str_to_signature(str_sgn);
 
-    Protected* res = init_protected(key, str_msg, sgn);
+    Protected *res = init_protected(key, str_msg, sgn);
 
     freeKey(key);
     freeSignature(sgn);
@@ -153,14 +184,7 @@ Protected* str_to_protected(char* str) {
     return res;
 }
 
-void freeSignature(Signature* signature) {
-    if (signature) {
-        free(signature->content);
-    }
-    free(signature);
-}
-
-void freeProtected(Protected* protected) {
+void freeProtected(Protected *protected) {
     if (protected) {
         free(protected->message);
         freeSignature(protected->signature);
@@ -170,24 +194,157 @@ void freeProtected(Protected* protected) {
     free(protected);
 }
 
-
-
-void delete_cell_key(CellKey* cellKey) {
-    if (! cellKey) return;
-    freeKey(cellKey->data);
-    free(cellKey);
-}
-
-void delete_list_keys(CellKey* cellKey) {
-    while (cellKey) {
-        CellKey* next = cellKey->next;
-        delete_cell_key(cellKey);
-        cellKey = next;
+Protected *copyProtected(Protected *protected) {
+    Protected *copy = malloc(sizeof(Protected));
+    if (!copy) {
+        fprintf(stderr, "[copyProtected] Erreur lors l'allocation :(\n");
+        return NULL;
     }
+
+    copy->votersPublicKey = copyKey(protected->votersPublicKey);
+    copy->signature = copySignature(protected->signature);
+    copy->message = strdup(protected->message);
+
+    return copy;
 }
 
-CellKey* create_cell_key(Key* key) {
-    CellKey* cellKey = malloc(sizeof(CellKey));
+/*
+ * =========== EXERCICE 4 : GÉNÉRATION DE DONNÉES POUR L'ÉLECTION + LECTURE DES CLÉS ET DÉCLARATIONS ===========
+ */
+
+CellProtected *read_protected() {
+    CellProtected *list = NULL;
+
+    FILE *file = fopen("declarations.txt", "r");
+    char str[256];
+    while (fgets(str, 255, file)) {
+        Protected *protected = str_to_protected(str);
+        list = prependProtected(protected, list);
+        freeProtected(protected);
+        protected = NULL;
+    }
+
+    return list;
+}
+
+CellKey *read_public_keys(char *filename) {
+    CellKey *list = NULL;
+
+    FILE *file = fopen(filename, "r");
+    char str[256];
+    while (fgets(str, 255, file)) {
+        char public[256];
+        sscanf(str, "%[^;]", public);
+        Key *key = str_to_key(public);
+        list = prependKey(key, list);
+        freeKey(key);
+    }
+
+    return list;
+}
+
+void generate_random_data(int nv, int nc) {
+    FILE *keysFile = fopen("keys.txt", "w+");
+    FILE *candidatesFile = fopen("candidates.txt", "w+");
+    FILE *declarationsFile = fopen("declarations.txt", "w");
+
+    HashTable *candidates = initHashTable(nc);
+    HashTable *candidateSecretKeys = initHashTable(nc);
+
+    int *candidateNumbers = malloc(nc * sizeof(int));
+
+    // La boucle ci-dessous tire nc candidats distincts, génère leurs clés et les garde en mémoire et les enregistre
+    // dans le fichier.
+    for (int i = 0; i < nc; ++i) {
+        int idx;
+        do {
+            idx = rand() % nv;
+        } while (hashTableContains(candidates, idx));
+
+        Key *publicKey = malloc(sizeof(Key));
+        Key *secretKey = malloc(sizeof(Key));
+        init_pair_keys(publicKey, secretKey, 3, 7);
+
+        char *publicKeyRepr = key_to_str(publicKey);
+        char *secretKeyRepr = key_to_str(secretKey);
+
+        add(candidates, idx, publicKey);
+        add(candidateSecretKeys, idx, secretKey);
+
+        fprintf(candidatesFile, "%s\n", publicKeyRepr);
+
+        freeKey(publicKey);
+        freeKey(secretKey);
+        free(publicKeyRepr);
+        free(secretKeyRepr);
+
+        candidateNumbers[i] = idx;
+    }
+
+    /*
+     * Vote.
+     * Pour chaque électeur, on choisit aléatoirement un indice entre 0 et (nc - 1),
+     * qui correspond à l'indice d'un candidat.
+     * On remplit ainsi le fichier de déclarations.
+     */
+    for (int i = 0; i < nv; ++i) {
+        Key *votersPublicKey;
+        Key *votersSecretKey;
+        char *candidatesPublicKeyRepr;
+        char *protectedRepr;
+
+        if (hashTableContains(candidates, i)) {
+            votersPublicKey = get(candidates, i);
+            votersSecretKey = get(candidateSecretKeys, i);
+        } else {
+            votersPublicKey = malloc(sizeof(Key));
+            votersSecretKey = malloc(sizeof(Key));
+
+            init_pair_keys(votersPublicKey, votersSecretKey, 3, 7);
+        }
+
+        // Affichage dans le fichier des votants.
+        char *publicKeyRepr = key_to_str(votersPublicKey);
+        char *secretKeyRepr = key_to_str(votersSecretKey);
+        fprintf(keysFile, "%s;%s\n", publicKeyRepr, secretKeyRepr);
+        free(publicKeyRepr);
+        free(secretKeyRepr);
+
+        // Choix du candidat.
+        int candidatesIdx = candidateNumbers[rand() % nc];
+        Key *candidatesPublicKey = get(candidates, candidatesIdx);
+
+        // Message:
+        candidatesPublicKeyRepr = key_to_str(candidatesPublicKey);
+
+        Signature *signature = sign(candidatesPublicKeyRepr, votersSecretKey);
+        Protected *protected = init_protected(votersPublicKey, candidatesPublicKeyRepr, signature);
+        protectedRepr = protected_to_str(protected);
+        fprintf(declarationsFile, "%s\n", protectedRepr);
+
+        free(protectedRepr);
+        free(candidatesPublicKeyRepr);
+        freeSignature(signature);
+        freeProtected(protected);
+        freeKey(votersSecretKey);
+        freeKey(votersPublicKey);
+    }
+
+    fclose(keysFile);
+    fclose(candidatesFile);
+    fclose(declarationsFile);
+
+    free(candidateNumbers);
+    freeHashTable(candidates);
+    freeHashTable(candidateSecretKeys);
+}
+
+/*
+ * =========== EXERCICE 5 : LISTES DE CLÉS ET DE DÉCLARATIONS ===========
+ */
+
+CellKey *create_cell_key(Key *key) {
+    CellKey *cellKey = malloc(sizeof(CellKey));
     if (!cellKey) {
         fprintf(stderr, "[create_cell_key] Erreur lors de l'allocation de la mémoire :(\n");
         return NULL;
@@ -199,50 +356,8 @@ CellKey* create_cell_key(Key* key) {
     return cellKey;
 }
 
-/**
- * @brief Crée une nouvelle liste en ajoutant une cellule contenant le clé passée en paramètre en tête de la liste passée.
- * @param key Clé contenue dans la future tête de la liste.
- * @param list Liste à laquelle ajouter la nouvelle cellule.
- * @return Liste mise à jour.
- */
-CellKey* prependKey(Key* key, CellKey* list) {
-    CellKey* cellKey = create_cell_key(key);
-    if (!cellKey) {
-        fprintf(stderr, "[prependKey] Erreur lors de l'allocation de la mémoire de la nouvelle cellule :(\n");
-        return list;
-    }
-
-    cellKey->next = list;
-    return cellKey;
-}
-
-CellKey* read_public_keys(char* filename) {
-    // todo tester
-    CellKey* list = NULL;
-
-    FILE* file = fopen(filename, "r");
-    char str[256];
-    while (fgets(str, 255, file)) {
-        char public[256];
-        sscanf(str, "%[^;]", public);
-        Key* key = str_to_key(public);
-        list = prependKey(key, list);
-        freeKey(key);
-        key = NULL;
-    }
-
-    return list;
-}
-
-void print_list_keys(CellKey* list) {
-    while (list) {
-        printf("%s\n", key_to_str(list->data));
-        list = list->next;
-    }
-}
-
-CellProtected* create_cell_protected(Protected* pr) {
-    CellProtected* cellProtected = malloc(sizeof(CellProtected));
+CellProtected *create_cell_protected(Protected *pr) {
+    CellProtected *cellProtected = malloc(sizeof(CellProtected));
 
     if (!cellProtected) {
         fprintf(stderr, "[create_cell_protected] Erreur lors de l'allocation de la mémoire :(\n");
@@ -255,8 +370,25 @@ CellProtected* create_cell_protected(Protected* pr) {
     return cellProtected;
 }
 
-CellProtected* prependProtected(Protected* protected, CellProtected* list) {
-    CellProtected* cellProtected = create_cell_protected(protected);
+/**
+ * @brief Crée une nouvelle liste en ajoutant une cellule contenant le clé passée en paramètre en tête de la liste passée.
+ * @param key Clé contenue dans la future tête de la liste.
+ * @param list Liste à laquelle ajouter la nouvelle cellule.
+ * @return Liste mise à jour.
+ */
+CellKey *prependKey(Key *key, CellKey *list) {
+    CellKey *cellKey = create_cell_key(copyKey(key));
+    if (!cellKey) {
+        fprintf(stderr, "[prependKey] Erreur lors de l'allocation de la mémoire de la nouvelle cellule :(\n");
+        return list;
+    }
+
+    cellKey->next = list;
+    return cellKey;
+}
+
+CellProtected *prependProtected(Protected *protected, CellProtected *list) {
+    CellProtected *cellProtected = create_cell_protected(copyProtected(protected));
     if (!cellProtected) {
         fprintf(stderr, "[prependProtected] Erreur lors de l'allocation de la mémoire de la nouvelle cellule :(\n");
         return list;
@@ -266,106 +398,62 @@ CellProtected* prependProtected(Protected* protected, CellProtected* list) {
     return cellProtected;
 }
 
-CellProtected* read_protected() {
-    CellProtected* list = NULL;
-
-    FILE* file = fopen("declarations.txt", "w");
-    char str[256];
-    while (fgets(str, 255, file)) {
-        Protected* protected = str_to_protected(str);
-        list = prependProtected(protected, list);
-        freeProtected(protected);
-        protected = NULL;
-    }
-
-    return list;
-}
-
-void print_list_protected(CellProtected* list){
-    while (list){
-        printf("%s \n", protected_to_str(list->data));
+void print_list_keys(CellKey *list) {
+    while (list) {
+        char *keyRepr = key_to_str(list->data);
+        printf("%s\n", keyRepr);
+        free(keyRepr);
         list = list->next;
     }
 }
 
-void generate_random_data(int nv, int nc) {
-    FILE* fkeys = fopen("tab.txt","w+");
-    FILE* candidatesFile = fopen("candidates.txt", "w+");
-    FILE* declarationsFile = fopen("declarations.txt", "w");
-
-    HashTable* candidates = initHashTable(nc);
-    int* candidateNumbers = malloc(nc * sizeof(int));
-    Key** voterIdxToPublicKey = malloc(nc * sizeof(Key*));
-    Key** voterIdxToSecretKey = malloc(nc * sizeof(Key*));
-
-    // La boucle ci-dessous tire nc candidats distincts et les ajoute à la table `candidates`.
-    for (int i = 0; i < nc; ++i) {
-        int idx;
-        do {
-            idx = rand() % nc;
-        } while (hashTableContains(candidates, idx));
-        add(candidates, idx, NULL);
-        candidateNumbers[i] = idx;
+void print_list_protected(CellProtected *list) {
+    while (list) {
+        char *protectedRepr = protected_to_str(list->data);
+        printf("%s \n", protectedRepr);
+        free(protectedRepr);
+        list = list->next;
     }
+}
 
-    printf("1.\n");
+void delete_cell_key(CellKey *cellKey) {
+    if (!cellKey) return;
+    freeKey(cellKey->data);
+    free(cellKey);
+}
 
-    /*
-     * Création des clés de chaque électeur et enregistrement des clés publiques.
-     */
-    for (int i = 0; i < nv; ++i) {
-        Key* publicKey = malloc(sizeof(Key));
-        Key* secretKey = malloc(sizeof(Key));
-
-        init_pair_keys(publicKey, secretKey, 3, 7);
-        fprintf(fkeys, "%s, %s\n", key_to_str(publicKey), key_to_str(secretKey));
-
-        /*if (hashTableContains(candidates, i)) {
-            set(candidates, i, publicKey);
-            fprintf(candidatesFile, "%s", key_to_str(publicKey));
-        }*/
-
-        voterIdxToPublicKey[i] = publicKey;
-        voterIdxToSecretKey[i] = secretKey;
+void delete_list_keys(CellKey *cellKey) {
+    while (cellKey) {
+        CellKey *next = cellKey->next;
+        delete_cell_key(cellKey);
+        cellKey = next;
     }
+}
 
-    printf("2.\n");
+void delete_cell_protected(CellProtected *cellProtected) {
+    if (!cellProtected) return;
+    freeProtected(cellProtected->data);
+    free(cellProtected);
+}
 
-    /*
-     * Vote.
-     * Pour chaque électeur, on choisit aléatoirement un indice entre 0 et (nc - 1),
-     * qui correspond à l'indice d'un candidat.
-     * On remplit ainsi le fichier de déclarations.
-     */
-    for (int i = 0; i < nv; ++i) {
-        Key* votersPublicKey = voterIdxToPublicKey[i];
-        Key* votersPrivateKey = voterIdxToSecretKey[i];
-
-        int candidatesIdx = rand() % nc;
-        Key* candidatesPublicKey = voterIdxToPublicKey[candidateNumbers[candidatesIdx]];
-
-        // Message:
-        char* candidatesPublicKeyStr = key_to_str(candidatesPublicKey);
-
-        Signature* signature = sign(candidatesPublicKeyStr, votersPrivateKey);
-        Protected* protected = init_protected(votersPublicKey, candidatesPublicKeyStr, signature);
-        fprintf(declarationsFile, "%s\n", protected_to_str(protected));
-
-        freeSignature(signature);
-        freeProtected(protected);
+void delete_list_protected(CellProtected *cellProtected) {
+    while (cellProtected) {
+        CellProtected *next = cellProtected->next;
+        delete_cell_protected(cellProtected);
+        cellProtected = next;
     }
+}
 
-    printf("3.\n");
+/*
+ * =========== EXERCICE 6 ===========
+ */
 
-    fclose(fkeys);
-    fclose(candidatesFile);
-    fclose(declarationsFile);
-    free(candidateNumbers);
-    freeHashTable(candidates);
-
-    for (int i = 0; i < nv; ++i) {
-        freeKey(voterIdxToPublicKey[i]);
-        freeKey(voterIdxToSecretKey[i]);
+void delete_liste_fraude(CellProtected *cellProtected) {
+    while (cellProtected) {
+        CellProtected *next = cellProtected->next;
+        if (!verify(cellProtected->data)) {
+            delete_cell_protected(cellProtected);
+        }
+        cellProtected = next;
     }
-    free(voterIdxToPublicKey);
 }
