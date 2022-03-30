@@ -448,12 +448,21 @@ void delete_list_protected(CellProtected *cellProtected) {
  * =========== EXERCICE 6 ===========
  */
 
-void delete_liste_fraude(CellProtected *cellProtected) {
-    while (cellProtected) {
+// TODO
+CellProtected *delete_liste_fraude(CellProtected *cellProtected) {
+    if (!cellProtected) return NULL;
+    while (cellProtected && !verify(cellProtected->data)) {
         CellProtected *next = cellProtected->next;
-        if (!verify(cellProtected->data)) {
-            delete_cell_protected(cellProtected);
-        }
+        delete_cell_protected(cellProtected);
         cellProtected = next;
+    }
+    while (cellProtected && cellProtected->next) {
+        CellProtected *tmp  = cellProtected->next;
+        if (!verify(tmp->data)) {
+            CellProtected *next = tmp->next;
+            delete_cell_protected(next);
+            cellProtected->next = next;
+        }
+        cellProtected = cellProtected->next;
     }
 }

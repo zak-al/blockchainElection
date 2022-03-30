@@ -104,7 +104,7 @@ void test_rsa() {
 
     printf("Message initilal : %s\n", message);
     printf("Représentation chiffrée :\n");
-    print_long_vector(encrypted, len);
+    printLongVector(encrypted, len);
     printf("\n");
 
     char *decrypted = decrypt(encrypted, len, u, n);
@@ -248,12 +248,12 @@ void testFourni() {
     printf("%s vote pour %s\n", key_to_str(pKey), mess);
     Signature *sgn = sign(mess, sKey);
     printf("signature : ");
-    print_long_vector(sgn->content, sgn->length);
+    printLongVector(sgn->content, sgn->length);
     chaine = signature_to_str(sgn);
     printf(" signature to str : %s \n", chaine);
     sgn = str_to_signature(chaine);
     printf("str to signature : ");
-    print_long_vector(sgn->content, sgn->length);
+    printLongVector(sgn->content, sgn->length);
     // Testing protected:
     Protected *pr = init_protected(pKey, mess, sgn);
     // Verification:
@@ -276,7 +276,7 @@ void testFourni() {
 int main(void) {
     srand(time(NULL));
 
-    test_modpow(10000);
+    /*test_modpow(10000);
 
     printf("Tests str_to_key et key_to_str.\n");
     tests_str(250);
@@ -284,8 +284,8 @@ int main(void) {
     printf("Tests HashTable.\n");
     hashTableTest(25);
     printf("\tTerminé.\n");
-    printf("Génération des données de vote.\n");
-    generate_random_data(15, 3);
+    printf("Génération des données de vote.\n");*/
+    generate_random_data(10, 5);
     printf("\tTerminé.\n");
     printf("Test des fonctions de lecture.\n");
     test_read();
