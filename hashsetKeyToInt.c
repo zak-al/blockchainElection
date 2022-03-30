@@ -44,3 +44,19 @@ HashTableKeyToInt* create_hashtable(CellKey* keys, int size){
         keys = keys->next;
     }
 }
+
+void delete_HashCell(HashCell *h) {
+    if (!h) return;
+    freeKey(h->key);
+    free(h);
+}
+
+void delete_hashtable(HashTableKeyToInt* t){
+    if(!t) return;
+
+    for(int i= 0; i < t->size; i++){
+        delete_HashCell(t->tab[i]);
+    }
+    free(t->tab);
+    free(t);
+}

@@ -23,4 +23,7 @@ int find_position(HashTableKeyToInt* t, Key* key);
 
 HashTableKeyToInt* create_hashtable(CellKey* keys, int size);
 
+void delete_hashtable(HashTableKeyToInt* t);
+void freeHashCell(HashCell *h);
+
 #endif //PROJETSTR_HASHSETKEYTOINT_H
