@@ -115,4 +115,8 @@ void delete_list_keys(CellKey *cellKey);
 
 void delete_liste_fraude(CellProtected *cellProtected);
 
+void delete_cell_protected(CellProtected** cellProtected);
+void delete_list_protected(CellProtected** cellProtected);
+void delete_liste_fraude(CellProtected** cellProtected);
+
 #endif //PROJETSTR_VOTING_H
