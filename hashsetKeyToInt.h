@@ -3,6 +3,7 @@
 
 #include "stdio.h"
 #include "rsa.h"
+#include "voting.h"
 
 typedef struct {
     Key* key;
