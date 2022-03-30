@@ -1,15 +1,38 @@
-//
-// Created by Zakarie Aloui on 01/03/2022.
-//
-
 #include <stdio.h>
 #include "rsa.h"
+
+/**
+ * @brief Tests if two keys have the same values.
+ * @param x A key
+ * @param y A key
+ * @return an integer representing true if x and y are equal, false otherwise.
+ */
+int keysEqual(Key *x, Key *y) {
+    return (x->n == y->n && x->val == y->val);
+}
+
+/**
+ * @brief Copies a key.
+ * @param key A key.
+ * @return A dynamically-allocated copy of `key`.
+ */
+Key *copyKey(Key *key) {
+    Key *copy = malloc(sizeof(Key));
+    if (!copy) {
+        fprintf(stderr, "[copyKey] Erreur lors l'allocation :(\n");
+        return NULL;
+    }
+
+    copy->n = key->n;
+    copy->val = key->val;
+    return copy;
+}
 
 size_t max(long x, long y) {
     return x < y ? y : x;
 }
 
-long extended_gcd(long s, long t, long* u, long* v) {
+long extended_gcd(long s, long t, long *u, long *v) {
     if (s == 0) {
         *u = 0;
         *v = 1;
@@ -41,7 +64,7 @@ long extended_gcd(long s, long t, long* u, long* v) {
  * @param s pointer that is to take the parameter s of the public key
  * @param u pointer that is to take the parameter u of the private key, i.e. the multiplicative inverse of s modulo n
  */
-void generate_key_values(long p, long q, long* n, long* s, long* u) {
+void generate_key_values(long p, long q, long *n, long *s, long *u) {
     *n = p * q;
     long t = (p - 1) * (q - 1);
     long _s;
@@ -72,12 +95,12 @@ void generate_key_values(long p, long q, long* n, long* s, long* u) {
  * @param n parameter n of the public key (modulo)
  * @return a long array where each cell is the encrypted version of the corresponding character in the input string
  */
-long* encrypt(const char* string, long s, long n) {
+long *encrypt(const char *string, long s, long n) {
     size_t len = strlen(string);
 
-    long* res = malloc(len * sizeof(long));
+    long *res = malloc(len * sizeof(long));
     if (!res) {
-        fprintf(stderr,"erreur de l'allocation\n");
+        fprintf(stderr, "erreur de l'allocation\n");
         return NULL;
     }
 
@@ -105,11 +128,11 @@ long* encrypt(const char* string, long s, long n) {
  * @param n parameter n (modulo)
  * @return a null-terminated string corresponding to the uncrypted value of the string contained in the first parameter
  */
-char* decrypt(const long* string, size_t size, long u, long n) {
-    char* res = malloc((size + 1) * sizeof *res);
+char *decrypt(const long *string, size_t size, long u, long n) {
+    char *res = malloc((size + 1) * sizeof *res);
 
     if (!res) {
-        fprintf(stderr,"erreur de l'allocation\n");
+        fprintf(stderr, "erreur de l'allocation\n");
         return NULL;
     }
 
@@ -122,13 +145,12 @@ char* decrypt(const long* string, size_t size, long u, long n) {
     return res;
 }
 
-void init_key(Key* key, long val, long n) {
+void init_key(Key *key, long val, long n) {
     key->val = val;
     key->n = n;
 }
 
-// todo questionnement sur le type de low_size et up_size...
-void init_pair_keys(Key* pKey, Key* sKey, int low_size, int up_size) {
+void init_pair_keys(Key *pKey, Key *sKey, int low_size, int up_size) {
     long pub_val, priv_val, n;
     long p = random_prime_number(low_size, up_size, 5);
     long q;
@@ -141,26 +163,23 @@ void init_pair_keys(Key* pKey, Key* sKey, int low_size, int up_size) {
     init_key(sKey, priv_val, n);
 }
 
-char* key_to_str(Key* key) {
-    // Todo tester
-    // Le paramètre de malloc permet de faire une estimation de la taille espérée de la chaîne.
-    char* repr = malloc((max(key->n / 16 + 1, key->val / 16 + 1) + 5) * 2);
+char *key_to_str(Key *key) {
+    char *repr = malloc((max(key->n / 16 + 1, key->val / 16 + 1) + 5) * 2);
     if (!repr) {
-        fprintf(stderr, "[] Erreur lors l'allocation de la représentation de la clé :(\n");
+        fprintf(stderr, "[key_to_str] Erreur lors l'allocation de la représentation de la clé :(\n");
         return NULL;
     }
 
     sprintf(repr, "(%lx, %lx)", key->val, key->n);
-    //realloc(repr, strlen(repr) + 1);
+    repr = realloc(repr, (strlen(repr) + 1) * sizeof(char));
 
     return repr;
 }
 
-Key* str_to_key(char* repr) {
-    // todo tester
+Key *str_to_key(char *repr) {
     long val, n;
     sscanf(repr, "(%lx, %lx)", &val, &n);
-    Key* key = malloc(sizeof(Key));
+    Key *key = malloc(sizeof(Key));
     if (!key) {
         fprintf(stderr, "[str_to_key] Erreur lors l'allocation de la clé :(\n");
         return NULL;
@@ -170,6 +189,6 @@ Key* str_to_key(char* repr) {
     return key;
 }
 
-void freeKey(Key* key) {
+void freeKey(Key *key) {
     free(key);
 }

@@ -1,10 +1,4 @@
-//
-// Created by Zakarie Aloui on 23/02/2022.
-//
-
 #include <stdlib.h>
-#include <printf.h>
-#include <string.h>
 #include "primalite.h"
 
 int is_prime_naive(long p) {
@@ -50,7 +44,7 @@ long modpow(long base, long exponent, long n) {
 }
 
 int witness(long a, long b, long d, long p) {
-    long x = modpow(a,d,p);
+    long x = modpow(a, d, p);
     if (x == 1) {
         return 0;
     }
@@ -86,7 +80,7 @@ int is_prime_miller(long p, int k) {
     long a;
     int i;
     for (i = 0; i < k; ++i) {
-        a = rand_long(2, p-1);
+        a = rand_long(2, p - 1);
         if (witness(a, b, d, p)) {
             return 0;
         }
