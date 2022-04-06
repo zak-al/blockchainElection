@@ -42,11 +42,7 @@ void print_list_keys(CellKey *list);
 
 CellProtected *create_cell_protected(Protected *pr);
 
-CellProtected *prependProtected(Protected *
-
-protected,
-CellProtected *list
-);
+CellProtected *prependProtected(Protected *protected, CellProtected *list);
 
 void delete_cell_key(CellKey *cellKey);
 
