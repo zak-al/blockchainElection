@@ -170,7 +170,7 @@ void tests_str(int nbTests) {
  */
 void hashTableTest(int nbTests) {
     for (int i = 0; i < nbTests; ++i) {
-        HashTable *hashTable = initHashTable(2 * i + 1);
+        __HashTable *hashTable = initHashTable(2 * i + 1);
         if (!hashTable) {
             fprintf(stderr, "[hashTableTest / création de la table] ERREUR !");
             continue;
@@ -281,7 +281,7 @@ int main(void) {
     printf("Tests str_to_key et key_to_str.\n");
     tests_str(250);
     printf("\tTerminé.\n");
-    printf("Tests HashTable.\n");
+    printf("Tests __HashTable.\n");
     hashTableTest(25);
     printf("\tTerminé.\n");
     printf("Génération des données de vote.\n");*/

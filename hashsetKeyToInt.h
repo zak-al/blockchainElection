@@ -14,11 +14,9 @@ typedef struct hashtable {
     int size;
 } HashTableKeyToInt;
 
-HashCell* create_hashcell(Key* key);
-
 int hash_function(Key* key, int size);
 
-int find_position(HashTableKeyToInt* t, Key* key);
+size_t find_position(HashTableKeyToInt* t, Key* key);
 
 HashTableKeyToInt* create_hashtable(CellKey* keys, int size);
 
