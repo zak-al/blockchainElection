@@ -26,10 +26,37 @@ int find_position(HashTable* t, Key* key) {
 
 HashTableKeyToInt* create_hashtable(CellKey* keys, int size){
     HashTableKeyToInt* newtable = malloc(sizeof(HashTableKeyToInt));
-    if (!hashtable) {
-        fprintf(stderr, "[create_hashcell] Erreur lors de l'allocation :(\n");
+    if (!newtable) {
+        fprintf(stderr, "[create_hashtable] Erreur lors de l'allocation :(\n");
         return NULL;
     }
-    hashtable->size = size;
 
+    newtable->tab = calloc(size * sizeof(HashCell));
+    if (!newtable->tab) {
+        fprintf(stderr, "[create_hashtable] Erreur lors de l'allocation :(\n");
+        return NULL;
+    }
+
+    newtable->size = size;
+    while(keys){
+        size_t idx = find_position(newtable, keys-> data);
+        newtable->tab[idx] = create_hashcell(keys->data);
+        keys = keys->next;
+    }
+}
+
+void delete_HashCell(HashCell *h) {
+    if (!h) return;
+    freeKey(h->key);
+    free(h);
+}
+
+void delete_hashtable(HashTableKeyToInt* t){
+    if(!t) return;
+
+    for(int i= 0; i < t->size; i++){
+        delete_HashCell(t->tab[i]);
+    }
+    free(t->tab);
+    free(t);
 }
