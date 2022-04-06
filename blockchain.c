@@ -8,6 +8,8 @@
 
 void write_fichier(char* filename, Block* block){
     FILE* file = fopen(filename, "w");
-    char* key = key_to_str(block->author);
-
+    char* block_str = block_to_str(block);
+    fprintf(file,"%s/%s \n", block->hash, block_str);
+    free(block_str);
 }
+

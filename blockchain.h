@@ -12,5 +12,7 @@ typedef struct block{
     int nonce;
 }Block;
 
+void write_fichier(char* filename, Block* block);
+
 
 #endif //BLOCKCHAINELECTION_BLOCKCHAIN_H
