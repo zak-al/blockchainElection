@@ -1,7 +1,3 @@
-//
-// Created by Zakarie Aloui on 09/03/2022.
-//
-
 #ifndef PROJETSTR_VOTING_H
 #define PROJETSTR_VOTING_H
 
@@ -9,61 +5,8 @@
 #include <stdio.h>
 #include "rsa.h"
 #include "hashset.h"
-
-/*
- * =========== DÉFINITION ET MÉTHODES DE SIGNATURE ===========
- */
-typedef struct {
-    long *content;
-    size_t length;
-} Signature;
-
-int signaturesEqual(Signature *s1, Signature *s2);
-
-void printLongVector(long *result, size_t size);
-
-long *copyLongArray(const long *array, size_t size);
-
-Signature *copySignature(Signature *signature);
-
-Signature *initSignature(const long *content, size_t size);
-
-Signature *sign(const char *mess, const Key *sKey);
-
-char *signature_to_str(Signature *sgn);
-
-Signature *str_to_signature(char *str);
-
-void freeSignature(Signature *signature);
-
-
-/*
- * =========== DÉFINITION ET MÉTHODES DE PROTECTED ===========
- */
-
-typedef struct {
-    Key *votersPublicKey;
-    char *message;
-    Signature *signature;
-} Protected;
-
-int protectedEqual(Protected *p1, Protected *p2);
-
-Protected *init_protected(Key *votersPublicKey, char *mess, Signature *sgn);
-
-void freeProtected(Protected *
-
-protected);
-
-char *protected_to_str(Protected *p);
-
-Protected *str_to_protected(char *str);
-
-int verify(Protected *pr);
-
-/*
- * =========== EXERCICE 4 : GÉNÉRATION DE DONNÉES POUR L'ÉLECTION + LECTURE DES CLÉS ET DÉCLARATIONS ===========
- */
+#include "Signature.h"
+#include "Protected.h"
 
 typedef struct cellKey {
     Key *data;
@@ -114,5 +57,6 @@ void delete_list_keys(CellKey *cellKey);
  */
 
 CellProtected *delete_liste_fraude(CellProtected *cellProtected);
+Key* computeWinner(CellProtected* declarations, CellKey* candidates, CellKey* voters, size_t sizeC, size_t sizeV);
 
 #endif //PROJETSTR_VOTING_H

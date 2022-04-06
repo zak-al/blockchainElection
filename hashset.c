@@ -5,7 +5,7 @@ long long int hash(unsigned long long key, size_t capacity) {
     return key mod capacity;
 }
 
-Key *listContains(List *head, int key) {
+Key *listContains(__List *head, int key) {
     while (head) {
         if (key == head->key) {
             return copyKey(head->value);
@@ -16,8 +16,8 @@ Key *listContains(List *head, int key) {
     return NULL;
 }
 
-HashTable *initHashTable(size_t capacity) {
-    HashTable *hashTable = malloc(sizeof(HashTable));
+__HashTable *initHashTable(size_t capacity) {
+    __HashTable *hashTable = malloc(sizeof(__HashTable));
 
     if (!hashTable) {
         fprintf(stderr, "[initHashTable] Erreur lors de l'allocation du tableau :(\n");
@@ -26,7 +26,7 @@ HashTable *initHashTable(size_t capacity) {
 
     hashTable->length = 0;
     hashTable->capacity = capacity;
-    hashTable->tab = calloc(capacity, sizeof(List *));
+    hashTable->tab = calloc(capacity, sizeof(__List *));
 
     if (!hashTable->tab) {
         fprintf(stderr, "[initHashTable] Erreur lors de l'allocation du tableau :(\n");
@@ -37,19 +37,19 @@ HashTable *initHashTable(size_t capacity) {
     return hashTable;
 }
 
-int hashTableContains(HashTable *hashTable, int key) {
+int hashTableContains(__HashTable *hashTable, int key) {
     long long h = hash(key, hashTable->capacity);
     return listContains(hashTable->tab[h], key) != NULL;
 }
 
-Key *get(HashTable *hashTable, int key) {
+Key *get(__HashTable *hashTable, int key) {
     long long h = hash(key, hashTable->capacity);
     return listContains(hashTable->tab[h], key);
 }
 
-void set(HashTable *hashTable, int key, Key *new) {
+void set(__HashTable *hashTable, int key, Key *new) {
     long long h = hash(key, hashTable->capacity);
-    List *l = hashTable->tab[h];
+    __List *l = hashTable->tab[h];
     while (l) {
         if (l->key == key) {
             freeKey(l->value);
@@ -60,10 +60,10 @@ void set(HashTable *hashTable, int key, Key *new) {
     }
 }
 
-void add(HashTable *hashTable, int key, Key *value) {
+void add(__HashTable *hashTable, int key, Key *value) {
     long long h = hash(key, hashTable->capacity);
 
-    List *newCell = malloc(sizeof(List));
+    __List *newCell = malloc(sizeof(__List));
     if (!newCell) {
         fprintf(stderr, "[add] Erreur lors de l'allocation de newCell :(\n");
         return;
@@ -75,19 +75,19 @@ void add(HashTable *hashTable, int key, Key *value) {
     hashTable->tab[h] = newCell;
 }
 
-void freeHashTableListCell(List *list) {
+void freeHashTableListCell(__List *list) {
     if (!list) return;
     freeKey(list->value);
     free(list);
 }
 
-void freeHashTable(HashTable *hashTable) {
+void freeHashTable(__HashTable *hashTable) {
     if (!hashTable) return;
 
     for (int i = 0; i < hashTable->capacity; ++i) {
-        List *l = hashTable->tab[i];
+        __List *l = hashTable->tab[i];
         while (l) {
-            List *tail = l->tail;
+            __List *tail = l->tail;
             freeHashTableListCell(l);
             l = tail;
         }

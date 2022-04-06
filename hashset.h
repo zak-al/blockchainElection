@@ -1,7 +1,3 @@
-//
-// Created by Zakarie Aloui on 26/03/2022.
-//
-
 #ifndef PROJETSTR_HASHSET_H
 #define PROJETSTR_HASHSET_H
 
@@ -12,22 +8,22 @@ typedef struct list {
     int key;
     Key* value;
     struct list* tail;
-} List;
+} __List;
 
 typedef struct {
     size_t capacity;
     size_t length;
-    List** tab;
-} HashTable;
+    __List** tab;
+} __HashTable;
 
 long long int hash(unsigned long long key, size_t capacity);
-Key* listContains(List* head, int key);
-HashTable* initHashTable(size_t capacity);
-int hashTableContains(HashTable* hashTable, int key);
-Key* get(HashTable* hashTable, int key);
-void set(HashTable* hashTable, int key, Key* new);
-void add(HashTable* hashTable, int key, Key* value);
-void freeHashTableListCell(List* list);
-void freeHashTable(HashTable* hashTable);
+Key* listContains(__List* head, int key);
+__HashTable* initHashTable(size_t capacity);
+int hashTableContains(__HashTable* hashTable, int key);
+Key* get(__HashTable* hashTable, int key);
+void set(__HashTable* hashTable, int key, Key* new);
+void add(__HashTable* hashTable, int key, Key* value);
+void freeHashTableListCell(__List* list);
+void freeHashTable(__HashTable* hashTable);
 
 #endif //PROJETSTR_HASHSET_H
