@@ -5,12 +5,24 @@
 #include "blockchain.h"
 #include "rsa.h"
 #include <stdio.h>
+#include <openssl/sha.h>
 
 void write_fichier(char* filename, Block* block){
     FILE* file = fopen(filename, "w");
-    char* block_str = blockToStr(block);
-    fprintf(file,"%s/%s\n", block->hash, block_str);
-    free(block_str);
+    char* authorKeyRepr = key_to_str(block->author);
+    fprintf(file,"%s/", authorKeyRepr);
+    free(authorKeyRepr);
+
+    fprintf(file,"%s/%s/%d/", block->hash, block->previous_hash,block->nonce);
+
+    CellProtected* current = block->votes;
+
+    while (current) {
+        char* protectedStr = protected_to_str(current->data);
+        fprintf(file, "%s/", protectedStr);
+        current = current->next;
+        free(protectedStr);
+    }
 }
 
 char* blockToStr(Block* block) {
@@ -80,3 +92,48 @@ Block* strToBlock(char* str) {
     freeKey(authorKey);
     free(previousHash);
 }
+
+unsigned char* str_to_hach(const char* str){
+    unsigned char* d = SHA256(str, strlen(str),0);
+    int i;
+    for(i=0; i<SHA256_DIGEST_LENGTH; i++){
+        printf("%02x",d[i]);
+    }
+    return d;
+}
+
+void compute_proof_of_work(Block* B, int d){
+    int valide = 0;
+
+    while(valide == 0){
+        valide = 1;
+        char* res = blockToStr(B);
+        char* hash = SHA256(res,strlen(res),0);
+        for(int i = 0; i < 4*d; i++){
+            if(hash[i] != 0){
+                valide = 0;
+                free(res);
+                free(hash);
+                continue;
+            }
+        }
+        B->nonce = B->nonce + 1;
+    }
+
+    B->nonce =B->nonce - 1;
+}
+
+int verify_block(Block* B, int d){
+    char* res = blockToStr(B);
+    unsigned char* hash = SHA256(res,strlen(res),0);
+    for(int i = 0; i < 4*d; i++){
+        if(hash[i] != 0){
+            return 0;
+        }
+    }
+    return 1;
+}
+
+
+
+

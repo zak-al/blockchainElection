@@ -1,5 +1,6 @@
 #include "voting.h"
 #include "HashTable.h"
+#include "Protected.h"
 
 /*
  * =========== EXERCICE 4 : GÉNÉRATION DE DONNÉES POUR L'ÉLECTION + LECTURE DES CLÉS ET DÉCLARATIONS ===========

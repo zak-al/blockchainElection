@@ -24,4 +24,6 @@ Protected *str_to_protected(char *str);
 
 int verify(Protected *pr);
 
+Protected *copyProtected(Protected *protected);
+
 #endif //PROJETSTR_PROTECTED_H

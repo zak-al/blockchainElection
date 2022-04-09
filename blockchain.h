@@ -19,5 +19,9 @@ typedef struct block{
 char* blockToStr(Block* block);
 void write_fichier(char* filename, Block* block);
 Block* strToBlock(char* str);
+unsigned char* str_to_hach(const char* str);
+
+void compute_proof_of_work(Block* B, int d);
+int verify_block(Block* B, int d);
 
 #endif //BLOCKCHAINELECTION_BLOCKCHAIN_H
