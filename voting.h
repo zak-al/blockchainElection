@@ -38,7 +38,7 @@ void delete_cell_protected(CellProtected *cellProtected);
 
 void delete_list_protected(CellProtected *cellProtected);
 
-void print_list_keys(CellKey *list);
+void printListKeys(CellKey *list);
 
 CellProtected *create_cell_protected(Protected *pr);
 

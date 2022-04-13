@@ -1,31 +1,28 @@
-//
-// Created by Zhichun Hua on 06/04/2022.
-//
-
 #include "blockchain.h"
 #include "rsa.h"
+#include "Protected.h"
 #include <stdio.h>
-#include <openssl/sha.h>
 
-void write_fichier(char* filename, Block* block){
+void freeBlock(Block* block) {
+    if (!block) return;
+
+    freeKey(block->author);
+    delete_list_protected(block->votes);
+    free(block->hash);
+    free(block->previous_hash);
+    free(block);
+}
+
+void writeBlock(char* filename, Block* block){
     FILE* file = fopen(filename, "w");
-    char* authorKeyRepr = key_to_str(block->author);
-    fprintf(file,"%s/", authorKeyRepr);
-    free(authorKeyRepr);
-
-    fprintf(file,"%s/%s/%d/", block->hash, block->previous_hash,block->nonce);
-
-    CellProtected* current = block->votes;
-
-    while (current) {
-        char* protectedStr = protected_to_str(current->data);
-        fprintf(file, "%s/", protectedStr);
-        current = current->next;
-        free(protectedStr);
-    }
+    char* block_str = blockToStr(block);
+    fprintf(file,"%s/%s\n", block->hash, block_str);
+    free(block_str);
+    fclose(file);
 }
 
 char* blockToStr(Block* block) {
+    // todo tester...
     char* repr = malloc(16384 * sizeof(char));
     char* authorKeyRepr = key_to_str(block->author);
     sprintf(repr, "%s/%s/%d", authorKeyRepr, block->previous_hash, block->nonce);
@@ -48,8 +45,9 @@ char* blockToStr(Block* block) {
 Block* strToBlock(char* str) {
     Key* authorKey;
     unsigned char* previousHash;
+    unsigned char* currentHash;
     int nonce;
-    CellProtected* votes;
+    CellProtected* votes = NULL;
 
     char buffer[256];
     size_t len = strlen(str);
@@ -62,15 +60,18 @@ Block* strToBlock(char* str) {
             ++bufferNo;
 
             if (bufferNo == 1) {
-                authorKey = str_to_key(buffer);
+                currentHash = (unsigned char*) strdup(buffer);
             }
             else if (bufferNo == 2) {
+                authorKey = str_to_key(buffer);
+            } else if (bufferNo == 3) {
                 previousHash = (unsigned char*) strdup(buffer);
-            }
-            if (bufferNo == 3) {
+            } else if (bufferNo == 4) {
                 nonce = atoi(buffer);
+            } else {
+                Protected* declaration = str_to_protected(buffer);
+                votes = prependProtected(declaration, votes);
             }
-
         } else {
             buffer[bufferIdx++] = str[i];
         }
@@ -88,15 +89,18 @@ Block* strToBlock(char* str) {
     block->votes = votes;
     block->nonce = nonce;
     block->previous_hash = previousHash;
+    block->hash = currentHash;
 
     freeKey(authorKey);
     free(previousHash);
+
+    return block;
 }
 
-unsigned char* str_to_hach(const char* str){
+unsigned char* strToHash(const char* str){
     unsigned char* d = SHA256(str, strlen(str),0);
     int i;
-    for(i=0; i<SHA256_DIGEST_LENGTH; i++){
+    for(i=0; i < SHA256_DIGEST_LENGTH; i++){
         printf("%02x",d[i]);
     }
     return d;
@@ -118,6 +122,8 @@ void compute_proof_of_work(Block* B, int d){
             }
         }
         B->nonce = B->nonce + 1;
+        free(hash);
+        free(res);
     }
 
     B->nonce =B->nonce - 1;
@@ -128,12 +134,10 @@ int verify_block(Block* B, int d){
     unsigned char* hash = SHA256(res,strlen(res),0);
     for(int i = 0; i < 4*d; i++){
         if(hash[i] != 0){
-            return 0;
+            return FALSE;
         }
     }
-    return 1;
+    free(res);
+    free(hash);
+    return TRUE;
 }
-
-
-
-

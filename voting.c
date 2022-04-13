@@ -192,7 +192,7 @@ CellProtected *prependProtected(Protected *protected, CellProtected *list) {
     return cellProtected;
 }
 
-void print_list_keys(CellKey *list) {
+void printListKeys(CellKey *list) {
     while (list) {
         char *keyRepr = key_to_str(list->data);
         printf("%s\n", keyRepr);
@@ -302,6 +302,6 @@ Key* computeWinner(CellProtected* declarations, CellKey* candidates, CellKey* vo
 
     Key* winnerKey = htKiArgmax(votersHashTable);
 
-    return NULL;
+    return winnerKey;
 }
 

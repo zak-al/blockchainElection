@@ -20,14 +20,14 @@ int main() {
     list_cell = prependKey(test, list_cell);
 
 //tests pour Question 5.3
-    print_list_keys(list_cell);
+    printListKeys(list_cell);
 
 //tests pour Question 5.4
     CellKey *ls_key = read_public_keys("keys.txt");
     CellKey *ls_candidate = read_public_keys("candidates.txt");
 //afficher les resultats
-    print_list_keys(ls_key);
-    print_list_keys(ls_candidate);
+    printListKeys(ls_key);
+    printListKeys(ls_candidate);
 
 //tests pour Question 5.5
     Key *test2 = malloc(sizeof(Key));
@@ -35,10 +35,10 @@ int main() {
     list_cell = prependKey(test2, list_cell);
     list_cell = prependKey(test, list_cell);
     printf("avant de supprimer : \n");
-    print_list_keys(list_cell);
+    printListKeys(list_cell);
     printf("apres avoir supprime : \n");
     delete_list_keys(list_cell);
-    //print_list_keys(list_cell);
+    //printListKeys(list_cell);
 
 /*tests pour Question 5.6 et Question 5.7
     Signature *sgn1 = init_signature(NULL, 0);
