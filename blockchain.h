@@ -8,16 +8,23 @@
 #include "rsa.h"
 #include "voting.h"
 
-typedef struct block{
+typedef struct {
     Key* author;
     CellProtected* votes;
     unsigned char* hash;
     unsigned char* previous_hash;
     int nonce;
-}Block;
+} Block;
+
+void freeBlock(Block* block);
+
+void copyBlock();
 
 char* blockToStr(Block* block);
-void write_fichier(char* filename, Block* block);
+void writeBlock(char* filename, Block* block);
 Block* strToBlock(char* str);
+unsigned char* strToHash(const char* str);
 
+void compute_proof_of_work(Block* B, int d);
+int verify_block(Block* B, int d);
 #endif //BLOCKCHAINELECTION_BLOCKCHAIN_H

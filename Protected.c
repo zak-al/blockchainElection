@@ -1,4 +1,5 @@
 #include "Protected.h"
+#include <stdio.h>
 
 int protectedEqual(Protected *p1, Protected *p2) {
     return strcmp(p1->message, p2->message) == 0 && keysEqual(p1->votersPublicKey, p2->votersPublicKey) &&

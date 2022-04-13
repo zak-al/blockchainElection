@@ -10,6 +10,8 @@ typedef struct {
     Signature *signature;
 } Protected;
 
+Protected *copyProtected(Protected *protected);
+
 int protectedEqual(Protected *p1, Protected *p2);
 
 Protected *init_protected(Key *votersPublicKey, char *mess, Signature *sgn);

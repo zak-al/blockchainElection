@@ -1,4 +1,4 @@
-tests: tests.o voting.o hashset.o rsa.o primalite.o
+tests: tests.o voting.o HashTable.o rsa.o primalite.o
 	gcc tests.o voting.o rsa.o hashset.o primalite.o -o tests
 
 tests.o: tests.c voting.c
@@ -13,8 +13,17 @@ rsa.o: rsa.c rsa.h primalite.c primalite.h
 voting.o: voting.c voting.h rsa.c rsa.h hashset.c hashset.h
 	gcc -Wall -c voting.c
 
-hashset.o: hashset.c hashset.h
-	gcc -Wall -c hashset.c
+HashTable.o: HashTable.c HashTable.h
+	gcc -Wall -c HashTable.c
+
+Protected.o: Protected.c Protected.h
+	gcc -Wall -c Protected.c
+
+Signature.o: Signature.c Signature.h
+	gcc -Wall -c Signature.c
+
+blockchain.o: blockchain.c blockchain.h
+	gcc -Wall -c blockchain.c
 
 clean:
 	rm -rf *.o

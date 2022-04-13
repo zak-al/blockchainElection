@@ -208,13 +208,13 @@ void hashTableTest(int nbTests) {
 
 void test_read() {
     CellKey *voterKeys = read_public_keys("keys.txt");
-    print_list_keys(voterKeys);
+    printListKeys(voterKeys);
     delete_list_keys(voterKeys);
 
     printf("\n");
 
     CellKey *candidateKeys = read_public_keys("candidates.txt");
-    print_list_keys(candidateKeys);
+    printListKeys(candidateKeys);
     delete_list_keys(candidateKeys);
 
     printf("\n");
@@ -273,6 +273,10 @@ void testFourni() {
     free(sKeyC);
 }
 
+void test_strToBlock_blockToStr() {
+
+}
+
 int main(void) {
     srand(time(NULL));
 
@@ -285,11 +289,11 @@ int main(void) {
     hashTableTest(25);
     printf("\tTerminé.\n");
     printf("Génération des données de vote.\n");*/
-    generate_random_data(10, 5);
+    /*generate_random_data(10, 5);
     printf("\tTerminé.\n");
     printf("Test des fonctions de lecture.\n");
     test_read();
-    printf("\tTerminé.\n");
+    printf("\tTerminé.\n");*/
 
     return 0;
 }
