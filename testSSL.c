@@ -1,7 +1,3 @@
-//
-// Created by Zhichun Hua on 13/04/2022.
-//
-
 #include <openssl/sha.h>
 #include <string.h>
 #include <stdio.h>
