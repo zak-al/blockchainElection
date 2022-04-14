@@ -25,4 +25,4 @@ add_executable(projetSTR
         Signature.h
         tests.c
         voting.c
-        voting.h)
+        voting.h Arborescente.c Arborescente.h)

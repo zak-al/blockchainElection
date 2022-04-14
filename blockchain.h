@@ -18,7 +18,7 @@ typedef struct {
 
 void freeBlock(Block* block);
 
-void copyBlock();
+Block* copyBlock();
 
 char* blockToStr(Block* block);
 void writeBlock(char* filename, Block* block);
@@ -27,4 +27,5 @@ unsigned char* strToHash(const char* str);
 
 void compute_proof_of_work(Block* B, int d);
 int verify_block(Block* B, int d);
+void delete_block(Block* b);
 #endif //BLOCKCHAINELECTION_BLOCKCHAIN_H

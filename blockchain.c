@@ -2,6 +2,7 @@
 #include "rsa.h"
 #include "Protected.h"
 #include <stdio.h>
+#include <openssl/sha.h>
 
 void freeBlock(Block* block) {
     if (!block) return;
@@ -140,4 +141,11 @@ int verify_block(Block* B, int d){
     free(res);
     free(hash);
     return TRUE;
+}
+
+void delete_block(Block* b){
+    free(b -> author);
+    free(b -> hash);
+    free(b -> previous_hash);
+    free(b);
 }
