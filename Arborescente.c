@@ -80,19 +80,11 @@ CellTree* lastNode(CellTree* cellTree){
 }
 
 CellProtected* fusionner(CellProtected* cp1, CellProtected* cp2){
-
-    CellProtected *res = create_cell_protected(cp1->data);
-    cp1 = cp1->next;
-
-    while(cp1){
-        prependProtected(cp1->data,res);
-        cp1 = cp1->next;
-    }
     while (cp2) {
-        prependProtected(cp2->data, res);
+        prependProtected(cp2->data, cp1);
         cp2 = cp2->next;
     }
-    return res;
+    return cp1;
 }
 
 CellProtected* declarationLongest(CellTree* cellTree){
