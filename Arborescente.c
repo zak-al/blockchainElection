@@ -88,7 +88,8 @@ CellProtected* fusionner(CellProtected* cp1, CellProtected* cp2){
 }
 
 CellProtected* declarationLongest(CellTree* cellTree){
-    CellProtected *res;
+    CellProtected *res = cellTree->block->votes;
+    cellTree = highestChild(cellTree);
     while (cellTree){
         res = fusionner(res, cellTree->block->votes);
         cellTree = highestChild(cellTree);
