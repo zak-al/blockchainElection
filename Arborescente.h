@@ -22,5 +22,8 @@ CellTree* highestChild(CellTree* cellTree);
 CellTree* lastNode(CellTree* tree);
 CellProtected* fusionner(CellProtected* cp1, CellProtected* cp2);
 CellProtected* declarationLongest(CellTree* cellTree);
+void submit_vote(Protected* p);
+void create_block(CellTree* tree, Key* author, int d);
+void add_block(int d, char* name);
 
 #endif //PROJETSTR_ARBORESCENTE_H

@@ -96,3 +96,89 @@ CellProtected* declarationLongest(CellTree* cellTree){
     }
     return res;
 }
+
+void submit_vote(Protected* p){
+    FILE* fic = fopen("Pending_votes.txt", "w+");
+
+    if(fic == NULL){
+        fprintf(stderr,"Erreur de fichier\n");
+    }
+    char* key = key_to_str(p->votersPublicKey);
+    char* sgn = signature_to_str(p->signature);
+    fprintf(fic, "%s %s %s\n", key, p->message, sgn);
+
+    free(key);
+    free(sgn);
+
+    fclose(fic);
+}
+
+void create_block(CellTree* cellTree, Key* author, int d){
+    Block* b = malloc(sizeof(Block));
+
+    Key* a = malloc(sizeof(Key));
+    init_key(a, author -> val, author -> n);
+    b -> author = a;
+
+    CellProtected* cellProtected = read_protected("Pending_votes.txt");
+    b -> votes = cellProtected;
+
+    remove("Pending_votes.txt");
+
+    b -> previous_hash = (unsigned char *)strdup((const char *)tree -> block -> hash);
+
+    b -> nonce = 0;
+    //compute_proof_of_work(b, d);
+
+    char* str = blockToStr(b);
+    char* hash = strToHash(str);
+    b -> hash = (unsigned char *)strdup(hash);
+
+    free(str);
+    free(hash);
+
+    writeBlock("Pending_block.txt",b);
+
+    delete_list_protected(cellProtected);
+    delete_block(b);
+}
+
+void add_block(int d, char* name){
+
+    FILE* fic = fopen("Pending_block.txt", "r+");
+
+    char* str = fscanf(fic);
+
+    block* b = strToBlock(str);
+
+    if(verify_block(b, d)){
+        FILE* f = fopen(name, "w");
+
+        char* key = key_to_str(b -> author);
+
+        fprintf(f, "%s\n", key);
+        fprintf(f, "%s\n", b -> hash);
+        fprintf(f, "%s\n", b -> previous_hash);
+        fprintf(f, "%d\n", b -> nonce);
+
+        CellProtected* current = b -> votes;
+
+        while(current != NULL){
+            char* pr = protected_to_str(current -> data);
+
+            fprintf(f, "%s", pr);
+            current = current -> next;
+
+            free(pr);
+        }
+
+        free(key);
+        fclose(f);
+    }
+
+
+    delete_list_protected(b -> votes);
+    delete_block(b);
+
+    remove("Pending_block.txt");
+}
