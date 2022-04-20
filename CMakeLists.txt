@@ -8,10 +8,10 @@ include_directories(/usr/local/opt/openssl@3/include)
 add_executable(projetSTR
         blockchain.c
         blockchain.h
-        hashset.c
-        hashset.h
-        hashsetKeyToInt.c
-        hashsetKeyToInt.h
+        DEPRECATED_hashset.c
+        DEPRECATED_hashset.h
+        DEPRECATED_hashsetKeyToInt.c
+        DEPRECATED_hashsetKeyToInt.h
         HashTable.c
         HashTable.h
         partie3_tests.c

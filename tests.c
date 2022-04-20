@@ -1,11 +1,11 @@
 #include <printf.h>
 #include <limits.h>
 #include "voting.h"
-#include <openssl/sha.h>
 #include "blockchain.h"
-#include "Arborescence.h"
+#include <openssl/sha.h>
 #include <string.h>
 #include <stdio.h>
+#include "Arborescence.h"
 
 
 /*
@@ -176,7 +176,7 @@ void tests_str(int nbTests) {
  */
 void hashTableTest(int nbTests) {
     for (int i = 0; i < nbTests; ++i) {
-        __HashTable *hashTable = initHashTable(2 * i + 1);
+        __HashTable *hashTable = DEPRECATED_initHashTable(2 * i + 1);
         if (!hashTable) {
             fprintf(stderr, "[hashTableTest / création de la table] ERREUR !");
             continue;
@@ -187,21 +187,21 @@ void hashTableTest(int nbTests) {
             init_pair_keys(key, key2, 7, 15);
             add(hashTable, j, key);
 
-            if (!hashTableContains(hashTable, j)) {
+            if (!DEPRECATED_hashTableContains(hashTable, j)) {
                 fprintf(stderr, "[hashTableTest / test1] ERREUR !");
             }
 
-            if (hashTableContains(hashTable, j + 1)) {
+            if (DEPRECATED_hashTableContains(hashTable, j + 1)) {
                 fprintf(stderr, "[hashTableTest / test2] ERREUR !");
             }
 
-            if (!keysEqual(key, get(hashTable, j))) {
+            if (!keysEqual(key, DEPRECATED_get(hashTable, j))) {
                 fprintf(stderr, "[hashTableTest / test3] ERREUR !");
             }
 
             set(hashTable, j, key2);
 
-            if (!keysEqual(get(hashTable, j), key2)) {
+            if (!keysEqual(DEPRECATED_get(hashTable, j), key2)) {
                 fprintf(stderr, "[hashTableTest / test4] ERREUR !");
             }
 
@@ -290,8 +290,24 @@ void testSSL() {
 }
 
 void test_blockchian() {
+    generate_random_data(300, 5);
+    CellProtected* declarations = read_protected();
 
-    Key *pKey = malloc(sizeof(Key));
+    // On rend la première déclaration frauduleuse pour tester la fonction de filtrage anti-fraude.
+    declarations->data->message[0]++;
+    printf("Liste des déclarations :\n");
+    print_list_protected(declarations);
+    declarations = delete_liste_fraude(declarations);
+    printf("\n\n\nListe des déclarations après filtre anti-fraude :\n");
+    print_list_protected(declarations);
+    delete_list_protected(declarations);
+
+    /*while (declarations) {
+        submit_vote(declarations->data);
+        declarations = declarations->next;
+    }*/
+
+    /*Key *pKey = malloc(sizeof(Key));
     Key *sKey = malloc(sizeof(Key));
     init_pair_keys(pKey, sKey, 3, 7);
     printf("pKey: %lx, %lx\n", pKey->val, pKey->n);
@@ -302,21 +318,25 @@ void test_blockchian() {
     printf("%s vote pour %s\n",key_to_str(pKey), mess);
     Signature* sgn = sign(mess, sKey);
 
-    Protected *pr = init_protected(pKey,mess,sgn);
+    Protected *pr = init_protected(pKey,mess,sgn);*/
 
-    Block *b = malloc(sizeof(Block));
+    /*Block *b = malloc(sizeof(Block));
     b->votes = create_cell_protected(pr);
     compute_proof_of_work(b,4);
     b->author = pKey;
     char* str = blockToStr(b);
     b->hash = strToHash(str);
-    b->previous_hash = NULL;
+    b->previous_hash = NULL;*/
 }
-
-
 
 int main(void) {
     srand(time(NULL));
+    printf("\tTest Blockchain.\n");
+    test_blockchian();
+    printf("\tTerminé.\n");
+
+
+
 
     /*test_modpow(10000);
 
@@ -332,8 +352,6 @@ int main(void) {
     printf("Test des fonctions de lecture.\n");
     test_read();
     printf("\tTerminé.\n");*/
-    test_blockchian();
-    printf("\tTerminé.\n");
 
     return 0;
 }

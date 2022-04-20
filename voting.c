@@ -42,10 +42,14 @@ void generate_random_data(int nv, int nc) {
     FILE *candidatesFile = fopen("candidates.txt", "w+");
     FILE *declarationsFile = fopen("declarations.txt", "w");
 
-    __HashTable *candidates = initHashTable(nc);
-    __HashTable *candidateSecretKeys = initHashTable(nc);
+    __HashTable *candidates = DEPRECATED_initHashTable(nc);
+    __HashTable *candidateSecretKeys = DEPRECATED_initHashTable(nc);
 
-    int *candidateNumbers = malloc(nc * sizeof(int));
+    int* candidateNumbers = malloc(nc * sizeof(int));
+    if (!candidateNumbers) {
+        fprintf(stderr, "[generate_random_data/candidateNumbers] Erreur lors de l'allocation de la mémoire :(\n");
+        return;
+    }
 
     // La boucle ci-dessous tire nc candidats distincts, génère leurs clés et les garde en mémoire et les enregistre
     // dans le fichier.
@@ -53,10 +57,14 @@ void generate_random_data(int nv, int nc) {
         int idx;
         do {
             idx = rand() % nv;
-        } while (hashTableContains(candidates, idx));
+        } while (DEPRECATED_hashTableContains(candidates, idx));
 
         Key *publicKey = malloc(sizeof(Key));
         Key *secretKey = malloc(sizeof(Key));
+        if (!publicKey || !secretKey) {
+            fprintf(stderr, "[generate_random_data/publicKey,secretKey] Erreur lors de l'allocation de la mémoire :(\n");
+            return;
+        }
         init_pair_keys(publicKey, secretKey, 3, 7);
 
         char *publicKeyRepr = key_to_str(publicKey);
@@ -87,9 +95,9 @@ void generate_random_data(int nv, int nc) {
         char *candidatesPublicKeyRepr;
         char *protectedRepr;
 
-        if (hashTableContains(candidates, i)) {
-            votersPublicKey = get(candidates, i);
-            votersSecretKey = get(candidateSecretKeys, i);
+        if (DEPRECATED_hashTableContains(candidates, i)) {
+            votersPublicKey = DEPRECATED_get(candidates, i);
+            votersSecretKey = DEPRECATED_get(candidateSecretKeys, i);
         } else {
             votersPublicKey = malloc(sizeof(Key));
             votersSecretKey = malloc(sizeof(Key));
@@ -106,7 +114,7 @@ void generate_random_data(int nv, int nc) {
 
         // Choix du candidat.
         int candidatesIdx = candidateNumbers[rand() % nc];
-        Key *candidatesPublicKey = get(candidates, candidatesIdx);
+        Key *candidatesPublicKey = DEPRECATED_get(candidates, candidatesIdx);
 
         // Message:
         candidatesPublicKeyRepr = key_to_str(candidatesPublicKey);
@@ -152,6 +160,10 @@ CellKey *create_cell_key(Key *key) {
 
 CellProtected *create_cell_protected(Protected *pr) {
     CellProtected *cellProtected = malloc(sizeof(CellProtected));
+    if (!cellProtected) {
+        fprintf(stderr, "[create_cell_protected] Erreur lors de l'allocation de la mémoire :(\n");
+        return NULL;
+    }
 
     if (!cellProtected) {
         fprintf(stderr, "[create_cell_protected] Erreur lors de l'allocation de la mémoire :(\n");
@@ -192,19 +204,32 @@ CellProtected *prependProtected(Protected *protected, CellProtected *list) {
     return cellProtected;
 }
 
-CellProtected* copyCellProtected_semiDeep(const CellProtected *cellProtected) {
+CellProtected* copyCellProtected_shallow(const CellProtected *cellProtected) {
     if (cellProtected == NULL) return NULL;
     CellProtected* copy = malloc(sizeof(CellProtected));
+    if (!copy) {
+        fprintf(stderr, "[copyCellProtected_shallow/copy] Erreur lors de l'allocation de la mémoire :(\n");
+        return NULL;
+    }
+
     CellProtected* current = copy;
     while (cellProtected) {
-        current->data = copyProtected_semiDeep(cellProtected->data);
+        current->data = cellProtected->data;
         if (cellProtected->next != NULL) {
             current->next = malloc(sizeof(CellProtected));
+            if (!current->next) {
+                fprintf(stderr, "[copyCellProtected_shallow/current->next] Erreur lors de l'allocation de la mémoire :(\n");
+                delete_cell_protected_shallow(copy);
+                return NULL;
+            }
+
             current = current->next;
         } else {
             return copy;
         }
     }
+
+    return copy;
 }
 
 void printListKeys(CellKey *list) {
@@ -245,6 +270,13 @@ void delete_cell_protected(CellProtected *cellProtected) {
     free(cellProtected);
 }
 
+void delete_cell_protected_shallow(CellProtected *cellProtected) {
+    if (!cellProtected) return;
+    freeProtected(cellProtected->data);
+    free(cellProtected);
+}
+
+
 void delete_list_protected(CellProtected *cellProtected) {
     while (cellProtected) {
         CellProtected *next = cellProtected->next;
@@ -253,11 +285,18 @@ void delete_list_protected(CellProtected *cellProtected) {
     }
 }
 
+void delete_list_protected_shallow(CellProtected *cellProtected) {
+    while (cellProtected) {
+        CellProtected *next = cellProtected->next;
+        delete_cell_protected_shallow(cellProtected);
+        cellProtected = next;
+    }
+}
+
 /*
  * =========== EXERCICE 6 ===========
  */
 
-// TODO
 CellProtected *delete_liste_fraude(CellProtected *cellProtected) {
     if (!cellProtected) return NULL;
     while (cellProtected && !verify(cellProtected->data)) {
@@ -265,6 +304,8 @@ CellProtected *delete_liste_fraude(CellProtected *cellProtected) {
         delete_cell_protected(cellProtected);
         cellProtected = next;
     }
+    CellProtected* orig = cellProtected;
+
     while (cellProtected && cellProtected->next) {
         CellProtected *tmp  = cellProtected->next;
         if (!verify(tmp->data)) {
@@ -274,6 +315,8 @@ CellProtected *delete_liste_fraude(CellProtected *cellProtected) {
         }
         cellProtected = cellProtected->next;
     }
+
+    return orig;
 }
 
 Key* computeWinner(CellProtected* declarations, CellKey* candidates, CellKey* voters, size_t sizeC, size_t sizeV) {

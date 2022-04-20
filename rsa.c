@@ -164,14 +164,19 @@ void init_pair_keys(Key *pKey, Key *sKey, int low_size, int up_size) {
 }
 
 char *key_to_str(Key *key) {
+    printf("11\n");
     char *repr = malloc((max(key->n / 16 + 1, key->val / 16 + 1) + 5) * 2);
     if (!repr) {
         fprintf(stderr, "[key_to_str] Erreur lors l'allocation de la représentation de la clé :(\n");
         return NULL;
     }
 
+    printf("22\n");
+
     sprintf(repr, "(%lx, %lx)", key->val, key->n);
     repr = realloc(repr, (strlen(repr) + 1) * sizeof(char));
+
+    printf("3\n");
 
     return repr;
 }

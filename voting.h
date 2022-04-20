@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "rsa.h"
-#include "hashset.h"
+#include "DEPRECATED_hashset.h"
 #include "Signature.h"
 #include "Protected.h"
 
@@ -36,9 +36,13 @@ void print_list_protected(CellProtected *list);
 
 void delete_cell_protected(CellProtected *cellProtected);
 
+void delete_cell_protected_shallow(CellProtected *cellProtected);
+
 void delete_list_protected(CellProtected *cellProtected);
 
-CellProtected * copyCellProtected_semiDeep(const CellProtected *cellProtected);
+void delete_list_protected_shallow(CellProtected *cellProtected);
+
+CellProtected* copyCellProtected_shallow(const CellProtected *cellProtected);
 
 void printListKeys(CellKey *list);
 

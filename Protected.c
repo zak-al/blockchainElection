@@ -31,12 +31,17 @@ int verify(Protected *pr) {
     return res;
 }
 
-char *protected_to_str(Protected *p) {
-    char *p_res = malloc(256 * sizeof(char));
+char* protected_to_str(Protected *p) {
+    if (p == NULL) {
+        return NULL;
+    }
+
+    char *p_res = malloc(1024 * sizeof(char));
     if (!p_res) {
         fprintf(stderr, "[protected_to_str] Erreur lors de l'allocation :(\n");
         return NULL;
     }
+
     char *str_key = key_to_str(p->votersPublicKey);
     char *str_sgn = signature_to_str(p->signature);
 

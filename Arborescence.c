@@ -7,6 +7,8 @@ CellTree* createNode(Block* b) {
     cellTree->height = 0;
     cellTree->nextBro = NULL;
     cellTree->parent = NULL;
+
+    return cellTree;
 }
 
 int updateHeight(CellTree* parent, CellTree* child) {
@@ -51,7 +53,8 @@ void deleteCellTree(CellTree* cellTree){
     }
     deleteNode(cellTree);
 }
-CellTree* highestChild(CellTree* cellTree){
+
+CellTree* highestChild(CellTree* cellTree) {
     int max = -1;
     CellTree* high;
 
@@ -97,19 +100,17 @@ CellProtected* declarationLongest(CellTree* cellTree){
     return res;
 }
 
-void submit_vote(Protected* p){
+void submit_vote(Protected* p) {
     FILE* fic = fopen("Pending_votes.txt", "w+");
-
-    if(fic == NULL){
-        fprintf(stderr,"Erreur de fichier\n");
+    if (fic == NULL){
+        fprintf(stderr, "Erreur lors de l'ouverture du fichier.\n");
     }
-    char* key = key_to_str(p->votersPublicKey);
-    char* sgn = signature_to_str(p->signature);
-    fprintf(fic, "%s %s %s\n", key, p->message, sgn);
 
-    free(key);
-    free(sgn);
+    char* str = protected_to_str(p);
 
+    fprintf(fic, "%s", str);
+
+    free(str);
     fclose(fic);
 }
 
@@ -125,14 +126,14 @@ void create_block(CellTree* cellTree, Key* author, int d){
 
     remove("Pending_votes.txt");
 
-    b -> previous_hash = (unsigned char *)strdup((const char *)tree -> block -> hash);
+    b -> previous_hash = (unsigned char *) strdup((const char *) cellTree->block->hash);
 
     b -> nonce = 0;
     //compute_proof_of_work(b, d);
 
-    char* str = blockToStr(b);
-    char* hash = strToHash(str);
-    b -> hash = (unsigned char *)strdup(hash);
+    unsigned char* str = blockToStr(b);
+    unsigned char* hash = strToHash(str);
+    b -> hash = (unsigned char *)strdup((char*) hash);
 
     free(str);
     free(hash);
@@ -140,16 +141,17 @@ void create_block(CellTree* cellTree, Key* author, int d){
     writeBlock("Pending_block.txt",b);
 
     delete_list_protected(cellProtected);
-    delete_block(b);
+    freeBlock(b);
 }
 
 void add_block(int d, char* name){
-
     FILE* fic = fopen("Pending_block.txt", "r+");
 
-    char* str = fscanf(fic);
+    char* str = NULL;
 
-    block* b = strToBlock(str);
+    // todo
+    fgets(str, 18000, fic);
+    Block* b = strToBlock(str);
 
     if(verify_block(b, d)){
         FILE* f = fopen(name, "w");
@@ -157,7 +159,7 @@ void add_block(int d, char* name){
         char* key = key_to_str(b -> author);
 
         fprintf(f, "%s\n", key);
-        fprintf(f, "%s\n", b -> hash);
+        fprintf(f, "%s\n", b->hash);
         fprintf(f, "%s\n", b -> previous_hash);
         fprintf(f, "%d\n", b -> nonce);
 
@@ -178,7 +180,7 @@ void add_block(int d, char* name){
 
 
     delete_list_protected(b -> votes);
-    delete_block(b);
+    freeBlock(b);
 
     remove("Pending_block.txt");
 }

@@ -7,9 +7,7 @@
 void freeBlock(Block* block) {
     if (!block) return;
 
-    // freeKey(block->author);
-    // todo remplacer par supression semi-profonde pour ne pas supprimer les protected derrière
-    delete_list_protected(block->votes);
+    delete_list_protected_shallow(block->votes);
     free(block->hash);
     free(block->previous_hash);
     free(block);
@@ -100,13 +98,8 @@ Block* strToBlock(char* str) {
     return block;
 }
 
-unsigned char* strToHash(const char* str){
-    unsigned char* d = SHA256(str, strlen(str),0);
-    int i;
-    for(i=0; i < SHA256_DIGEST_LENGTH; i++){
-        printf("%02x",d[i]);
-    }
-    return d;
+unsigned char* strToHash(const unsigned char* str){
+    return SHA256(str, strlen((char*) str),0);
 }
 
 int startsWithDZeros(const char* string, int d) {
