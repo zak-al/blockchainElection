@@ -192,6 +192,21 @@ CellProtected *prependProtected(Protected *protected, CellProtected *list) {
     return cellProtected;
 }
 
+CellProtected* copyCellProtected_semiDeep(const CellProtected *cellProtected) {
+    if (cellProtected == NULL) return NULL;
+    CellProtected* copy = malloc(sizeof(CellProtected));
+    CellProtected* current = copy;
+    while (cellProtected) {
+        current->data = copyProtected_semiDeep(cellProtected->data);
+        if (cellProtected->next != NULL) {
+            current->next = malloc(sizeof(CellProtected));
+            current = current->next;
+        } else {
+            return copy;
+        }
+    }
+}
+
 void printListKeys(CellKey *list) {
     while (list) {
         char *keyRepr = key_to_str(list->data);

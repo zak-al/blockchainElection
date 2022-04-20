@@ -38,6 +38,8 @@ void delete_cell_protected(CellProtected *cellProtected);
 
 void delete_list_protected(CellProtected *cellProtected);
 
+CellProtected * copyCellProtected_semiDeep(const CellProtected *cellProtected);
+
 void printListKeys(CellKey *list);
 
 CellProtected *create_cell_protected(Protected *pr);

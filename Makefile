@@ -1,5 +1,5 @@
-tests: tests.o voting.o HashTable.o rsa.o primalite.o
-	gcc tests.o voting.o rsa.o hashset.o primalite.o -o tests
+tests: tests.o voting.o HashTable.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o
+	gcc tests.o voting.o rsa.o hashset.o primalite.o HashTable.o Protected.o Signature.o blockchain.o -o tests -lssl -lcrypto
 
 tests.o: tests.c voting.c
 	gcc -Wall -c tests.c

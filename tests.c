@@ -1,6 +1,10 @@
 #include <printf.h>
 #include <limits.h>
 #include "voting.h"
+#include <openssl/sha.h>
+#include <string.h>
+#include <stdio.h>
+
 
 /*
  * ======== TESTS PARTIE 1 ========
@@ -273,7 +277,21 @@ void testFourni() {
     free(sKeyC);
 }
 
+void testSSL() {
+    const char *s = "Rosetta code";
+    unsigned char *d = (unsigned char*) SHA256( (const unsigned char*) s, strlen(s),0);
+    int i;
+    for (i = 0; i < SHA256_DIGEST_LENGTH; i++){
+        printf("%02x",d[i]);
+    }
+    putchar('\n');
+}
+
 void test_strToBlock_blockToStr() {
+
+}
+
+void test_computeProofOfWork() {
 
 }
 

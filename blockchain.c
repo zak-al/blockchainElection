@@ -7,7 +7,8 @@
 void freeBlock(Block* block) {
     if (!block) return;
 
-    freeKey(block->author);
+    // freeKey(block->author);
+    // todo remplacer par supression semi-profonde pour ne pas supprimer les protected derrière
     delete_list_protected(block->votes);
     free(block->hash);
     free(block->previous_hash);
@@ -22,23 +23,24 @@ void writeBlock(char* filename, Block* block){
     fclose(file);
 }
 
-char* blockToStr(Block* block) {
+unsigned char* blockToStr(Block* block) {
     // todo tester...
-    char* repr = malloc(16384 * sizeof(char));
+    // todo tester malloc
+    unsigned char* repr = malloc(16384 * sizeof(unsigned char));
     char* authorKeyRepr = key_to_str(block->author);
-    sprintf(repr, "%s/%s/%d", authorKeyRepr, block->previous_hash, block->nonce);
+    sprintf((char*) repr, "%s/%s/%d", authorKeyRepr, block->previous_hash, block->nonce);
     free(authorKeyRepr);
 
     CellProtected* current = block->votes;
 
     while (current) {
         char* protectedStr = protected_to_str(current->data);
-        sprintf(repr, "%s/%s", repr, protectedStr);
+        sprintf((char*) repr, "%s/%s", repr, protectedStr);
         current = current->next;
         free(protectedStr);
     }
 
-    repr = realloc(repr, (strlen(repr) + 1) * sizeof(char));
+    repr = realloc(repr, (strlen((char*) repr) + 1) * sizeof(char));
 
     return repr;
 }
@@ -107,27 +109,47 @@ unsigned char* strToHash(const char* str){
     return d;
 }
 
-void compute_proof_of_work(Block* B, int d){
-    int valide = 0;
-
-    while(valide == 0){
-        valide = 1;
-        char* res = blockToStr(B);
-        char* hash = SHA256(res,strlen(res),0);
-        for(int i = 0; i < 4*d; i++){
-            if(hash[i] != 0){
-                valide = 0;
-                free(res);
-                free(hash);
-                continue;
-            }
+int startsWithDZeros(const char* string, int d) {
+    while (d > 0) {
+        --d;
+        if (string[d] != '0') {
+            return FALSE;
         }
-        B->nonce = B->nonce + 1;
-        free(hash);
-        free(res);
     }
+    return TRUE;
+}
 
-    B->nonce =B->nonce - 1;
+void compute_proof_of_work(Block* b, int d) {
+    int bd = 4 * d;
+
+    b->nonce = 0;
+    while (TRUE) {
+        ++(b->nonce);
+        unsigned char* str = blockToStr(b);
+        unsigned char* hash = SHA256(str, strlen(str), 0);
+        if (startsWithDZeros(hash, bd)) {
+            free(str);
+            free(hash);
+            return;
+        }
+
+        free(str);
+        free(hash);
+    }
+}
+
+Block* copyBlock(Block* orig) {
+    /*
+     * Copie semi-profonde. Il n'y a pas de copie des élements de la chaîne votes ni de la clé de l'auteur.
+     */
+    Block* block = malloc(sizeof(Block));
+    block->nonce = orig->nonce;
+    block->hash = (unsigned char*) strdup((char*) orig->hash);
+    block->previous_hash = (unsigned char*) strdup((char*) orig->previous_hash);
+    block->votes = orig->votes;
+    block->author = orig->author;
+
+    return block;
 }
 
 int verify_block(Block* B, int d){
