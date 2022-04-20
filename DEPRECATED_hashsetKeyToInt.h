@@ -1,5 +1,5 @@
-#ifndef PROJETSTR_HASHSETKEYTOINT_H
-#define PROJETSTR_HASHSETKEYTOINT_H
+#ifndef PROJETSTR_DEPRECATED_HASHSETKEYTOINT_H
+#define PROJETSTR_DEPRECATED_HASHSETKEYTOINT_H
 
 #include "stdio.h"
 #include "rsa.h"
@@ -24,4 +24,4 @@ HashTableKeyToInt* create_hashtable(CellKey* keys, int size);
 void delete_hashtable(HashTableKeyToInt* t);
 void freeHashCell(HashCell *h);
 
-#endif //PROJETSTR_HASHSETKEYTOINT_H
+#endif //PROJETSTR_DEPRECATED_HASHSETKEYTOINT_H

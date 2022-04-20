@@ -1,4 +1,4 @@
-#include "hashsetKeyToInt.h"
+#include "DEPRECATED_hashsetKeyToInt.h"
 
 HashCell* create_hashcell(Key* key) {
     HashCell *hashCell = malloc(sizeof(HashCell));

@@ -17,6 +17,10 @@ size_t htIkFindPosition(HashTable* t, int key) {
     return idx;
 }
 
+int hashInt(int i, size_t capacity) {
+    return i mod capacity;
+}
+
 /*
  * =========== htKi : table de hachage Key* vers entier ===========
  */
