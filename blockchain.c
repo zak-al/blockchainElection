@@ -23,7 +23,7 @@ void writeBlock(char* filename, Block* block){
     fclose(file);
 }
 
-unsigned char* blockToStr(Block* block) {
+char* blockToStr(Block* block) {
     // todo tester...
     // todo tester malloc
     unsigned char* repr = malloc(16384 * sizeof(unsigned char));

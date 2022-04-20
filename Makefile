@@ -1,5 +1,5 @@
-tests: tests.o voting.o HashTable.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o
-	gcc tests.o voting.o rsa.o hashset.o primalite.o HashTable.o Protected.o Signature.o blockchain.o -o tests -lssl -lcrypto
+tests: tests.o voting.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o
+	gcc tests.o voting.o rsa.o  primalite.o HashTable.o Protected.o Signature.o blockchain.o -o tests -lssl -lcrypto
 
 tests.o: tests.c voting.c
 	gcc -Wall -c tests.c
@@ -23,7 +23,7 @@ Signature.o: Signature.c Signature.h
 	gcc -Wall -c Signature.c
 
 blockchain.o: blockchain.c blockchain.h
-	gcc -Wall -c blockchain.c
+	gcc -Wall -c blockchain.c -lssl -lcrypto
 
 clean:
 	rm -rf *.o

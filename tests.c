@@ -2,6 +2,8 @@
 #include <limits.h>
 #include "voting.h"
 #include <openssl/sha.h>
+#include "blockchain.h"
+#include "Arborescence.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -287,13 +289,31 @@ void testSSL() {
     putchar('\n');
 }
 
-void test_strToBlock_blockToStr() {
+void test_blockchian() {
 
+    Key *pKey = malloc(sizeof(Key));
+    Key *sKey = malloc(sizeof(Key));
+    init_pair_keys(pKey, sKey, 3, 7);
+    printf("pKey: %lx, %lx\n", pKey->val, pKey->n);
+    printf("sKey: %lx, %lx\n", sKey->val, sKey->n);
+
+    //Declaration:
+    char* mess = key_to_str(pKey);
+    printf("%s vote pour %s\n",key_to_str(pKey), mess);
+    Signature* sgn = sign(mess, sKey);
+
+    Protected *pr = init_protected(pKey,mess,sgn);
+
+    Block *b = malloc(sizeof(Block));
+    b->votes = create_cell_protected(pr);
+    compute_proof_of_work(b,4);
+    b->author = pKey;
+    char* str = blockToStr(b);
+    b->hash = strToHash(str);
+    b->previous_hash = NULL;
 }
 
-void test_computeProofOfWork() {
 
-}
 
 int main(void) {
     srand(time(NULL));
@@ -312,6 +332,8 @@ int main(void) {
     printf("Test des fonctions de lecture.\n");
     test_read();
     printf("\tTerminé.\n");*/
+    test_blockchian();
+    printf("\tTerminé.\n");
 
     return 0;
 }

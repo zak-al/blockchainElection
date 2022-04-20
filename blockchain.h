@@ -20,7 +20,7 @@ void freeBlock(Block* block);
 
 Block* copyBlock(Block* orig);
 
-unsigned char* blockToStr(Block* block);
+char* blockToStr(Block* block);
 void writeBlock(char* filename, Block* block);
 Block* strToBlock(char* str);
 unsigned char* strToHash(const char* str);
