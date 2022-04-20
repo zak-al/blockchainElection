@@ -3,7 +3,7 @@ project(projetSTR C)
 
 set(CMAKE_C_STANDARD 11)
 
-include_directories(.)
+include_directories(/usr/local/opt/openssl@3/include)
 
 add_executable(projetSTR
         blockchain.c
@@ -25,4 +25,4 @@ add_executable(projetSTR
         Signature.h
         tests.c
         voting.c
-        voting.h)
+        voting.h Arborescence.c Arborescence.h)

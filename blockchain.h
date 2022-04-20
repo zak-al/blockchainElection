@@ -18,13 +18,14 @@ typedef struct {
 
 void freeBlock(Block* block);
 
-void copyBlock();
+Block* copyBlock(Block* orig);
 
-char* blockToStr(Block* block);
+unsigned char* blockToStr(Block* block);
 void writeBlock(char* filename, Block* block);
 Block* strToBlock(char* str);
 unsigned char* strToHash(const char* str);
 
 void compute_proof_of_work(Block* B, int d);
 int verify_block(Block* B, int d);
+
 #endif //BLOCKCHAINELECTION_BLOCKCHAIN_H
