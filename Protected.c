@@ -1,13 +1,13 @@
 #include "Protected.h"
 #include <stdio.h>
 
-int protectedEqual(Protected *p1, Protected *p2) {
+int protectedEqual(Protected* p1, Protected* p2) {
     return strcmp(p1->message, p2->message) == 0 && keysEqual(p1->votersPublicKey, p2->votersPublicKey) &&
            signaturesEqual(p1->signature, p2->signature);
 }
 
-Protected *init_protected(Key *votersPublicKey, char *mess, Signature *sgn) {
-    Protected *result = malloc(sizeof(Protected));
+Protected* init_protected(const Key* votersPublicKey, char* mess, Signature* sgn) {
+    Protected* result = malloc(sizeof(Protected));
 
     if (!result) {
         fprintf(stderr, "[init_protected] Erreur lors de l'allocation de Protected :(\n");
@@ -21,8 +21,8 @@ Protected *init_protected(Key *votersPublicKey, char *mess, Signature *sgn) {
     return result;
 }
 
-int verify(Protected *pr) {
-    char *decrypted = decrypt(pr->signature->content,
+int verify(Protected* pr) {
+    char* decrypted = decrypt(pr->signature->content,
                               pr->signature->length,
                               pr->votersPublicKey->val,
                               pr->votersPublicKey->n);
@@ -31,19 +31,19 @@ int verify(Protected *pr) {
     return res;
 }
 
-char* protected_to_str(Protected *p) {
+char* protected_to_str(Protected* p) {
     if (p == NULL) {
         return NULL;
     }
 
-    char *p_res = malloc(1024 * sizeof(char));
+    char* p_res = malloc(1024 * sizeof(char));
     if (!p_res) {
         fprintf(stderr, "[protected_to_str] Erreur lors de l'allocation :(\n");
         return NULL;
     }
 
-    char *str_key = key_to_str(p->votersPublicKey);
-    char *str_sgn = signature_to_str(p->signature);
+    char* str_key = key_to_str(p->votersPublicKey);
+    char* str_sgn = signature_to_str(p->signature);
 
     sprintf(p_res, "%s:%s:%s", str_key, p->message, str_sgn);
 
@@ -55,16 +55,16 @@ char* protected_to_str(Protected *p) {
     return p_res;
 }
 
-Protected *str_to_protected(char *str) {
+Protected* str_to_protected(char* str) {
     char str_key[256];
     char str_sgn[256];
     char str_msg[256];
     sscanf(str, "%[^:]:%[^:]:%s", str_key, str_msg, str_sgn);
 
-    Key *key = str_to_key(str_key);
-    Signature *sgn = str_to_signature(str_sgn);
+    Key* key = str_to_key(str_key);
+    Signature* sgn = str_to_signature(str_sgn);
 
-    Protected *res = init_protected(key, str_msg, sgn);
+    Protected* res = init_protected(key, str_msg, sgn);
 
     freeKey(key);
     freeSignature(sgn);
@@ -72,7 +72,7 @@ Protected *str_to_protected(char *str) {
     return res;
 }
 
-void freeProtected(Protected *protected) {
+void freeProtected(Protected* protected) {
     if (protected) {
         free(protected->message);
         freeSignature(protected->signature);
@@ -82,8 +82,8 @@ void freeProtected(Protected *protected) {
     free(protected);
 }
 
-Protected *copyProtected(Protected *protected) {
-    Protected *copy = malloc(sizeof(Protected));
+Protected* copyProtected(Protected* protected) {
+    Protected* copy = malloc(sizeof(Protected));
     if (!copy) {
         fprintf(stderr, "[copyProtected] Erreur lors l'allocation :(\n");
         return NULL;

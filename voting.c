@@ -42,9 +42,13 @@ void generate_random_data(int nv, int nc) {
     FILE *candidatesFile = fopen("candidates.txt", "w+");
     FILE *declarationsFile = fopen("declarations.txt", "w");
 
-    __HashTable *candidates = DEPRECATED_initHashTable(nc);
-    __HashTable *candidateSecretKeys = DEPRECATED_initHashTable(nc);
+    HashTable* candidates = htIkConstruct(nc + 1 + nc / 5);
+    HashTable* candidateSecretKeys = htIkConstruct(nc + 1 + nc / 5);
 
+    HashTable* existingKeys = htKiCreateHashTable(NULL, nv + 1 + nv / 5);
+
+    // candidateNumbers est un tableau qui énumère les indices des candidats.
+    // Il est utilisé en particulier pour en tirer un au hasard.
     int* candidateNumbers = malloc(nc * sizeof(int));
     if (!candidateNumbers) {
         fprintf(stderr, "[generate_random_data/candidateNumbers] Erreur lors de l'allocation de la mémoire :(\n");
@@ -57,21 +61,29 @@ void generate_random_data(int nv, int nc) {
         int idx;
         do {
             idx = rand() % nv;
-        } while (DEPRECATED_hashTableContains(candidates, idx));
+        } while (htIkExists(candidates, idx));
 
         Key *publicKey = malloc(sizeof(Key));
         Key *secretKey = malloc(sizeof(Key));
         if (!publicKey || !secretKey) {
             fprintf(stderr, "[generate_random_data/publicKey,secretKey] Erreur lors de l'allocation de la mémoire :(\n");
+            free(publicKey);
+            free(secretKey);
             return;
         }
-        init_pair_keys(publicKey, secretKey, 3, 7);
+
+        // On génère une nouvelle clé qui n'a encore pas été générée.
+        do {
+            init_pair_keys(publicKey, secretKey, 3, 7);
+        } while (htKiExists(existingKeys, publicKey));
+
+        htKiAdd(existingKeys, publicKey, 0);
 
         char *publicKeyRepr = key_to_str(publicKey);
         char *secretKeyRepr = key_to_str(secretKey);
 
-        add(candidates, idx, publicKey);
-        add(candidateSecretKeys, idx, secretKey);
+        htIkAdd(candidates, idx, publicKey);
+        htIkAdd(candidateSecretKeys, idx, secretKey);
 
         fprintf(candidatesFile, "%s\n", publicKeyRepr);
 
@@ -95,15 +107,44 @@ void generate_random_data(int nv, int nc) {
         char *candidatesPublicKeyRepr;
         char *protectedRepr;
 
-        if (DEPRECATED_hashTableContains(candidates, i)) {
-            votersPublicKey = DEPRECATED_get(candidates, i);
-            votersSecretKey = DEPRECATED_get(candidateSecretKeys, i);
+        printf("DEBUG 1\n");
+
+        printf("%d\n", htIkExists(candidates, i));
+
+        int candidate = FALSE;
+
+        if (htIkExists(candidates, i)) {
+            printf("\tDEBUG CAN\n");
+            // Ce bloc récupère la clé déjà calculée dans le cas où l'électeur actuel est un candidat.
+            votersPublicKey = htIkGetOrNull(candidates, i);
+            votersSecretKey = htIkGetOrNull(candidateSecretKeys, i);
+            candidate = TRUE;
         } else {
+            printf("\tDEBUG NOT CAN\n");
+            // Si l'électeur n'est pas candidat, i.e. si sa clé n'a pas déjà été calculée,
+            // on la calcule comme on l'a fait pour les candidats.
             votersPublicKey = malloc(sizeof(Key));
             votersSecretKey = malloc(sizeof(Key));
 
-            init_pair_keys(votersPublicKey, votersSecretKey, 3, 7);
+            if (!votersPublicKey || !votersSecretKey) {
+                fprintf(stderr, "[generate_random_data/votersPublicKey,votersSecretKey] Erreur lors de l'allocation de la mémoire :(\n");
+                freeKey(votersPublicKey);
+                freeKey(votersSecretKey);
+            }
+
+            do {
+                printf("DEBUG hello\n");
+                init_pair_keys(votersPublicKey, votersSecretKey, 3, 7);
+            } while (htKiExists(existingKeys, votersPublicKey));
+
+            printf("DEBUG Keys chosen\n");
+
+            htKiAdd(existingKeys, votersPublicKey, 0);
+
+            printf("DEBUG Key added\n");
         }
+
+        printf("DEBUG 2\n");
 
         // Affichage dans le fichier des votants.
         char *publicKeyRepr = key_to_str(votersPublicKey);
@@ -112,24 +153,41 @@ void generate_random_data(int nv, int nc) {
         free(publicKeyRepr);
         free(secretKeyRepr);
 
+        printf("DEBUG 3\n");
+
         // Choix du candidat.
         int candidatesIdx = candidateNumbers[rand() % nc];
-        Key *candidatesPublicKey = DEPRECATED_get(candidates, candidatesIdx);
+        Key *candidatesPublicKey = htIkGetOrNull(candidates, candidatesIdx);
+
+        if (!candidatesPublicKey) {
+            fprintf(stderr, "[generate_random_data] Clé du candidat nulle.");
+        }
+
+        printf("DEBUG 4\n");
 
         // Message:
         candidatesPublicKeyRepr = key_to_str(candidatesPublicKey);
+
+        printf("DEBUG 5\n");
 
         Signature *signature = sign(candidatesPublicKeyRepr, votersSecretKey);
         Protected *protected = init_protected(votersPublicKey, candidatesPublicKeyRepr, signature);
         protectedRepr = protected_to_str(protected);
         fprintf(declarationsFile, "%s\n", protectedRepr);
 
+        printf("DEBUG 6\n");
+
         free(protectedRepr);
         free(candidatesPublicKeyRepr);
         freeSignature(signature);
         freeProtected(protected);
-        freeKey(votersSecretKey);
-        freeKey(votersPublicKey);
+
+        if (!candidate) {
+            freeKey(votersSecretKey);
+            freeKey(votersPublicKey);
+        }
+
+        printf("DEBUG 7\n");
     }
 
     fclose(keysFile);
@@ -137,8 +195,13 @@ void generate_random_data(int nv, int nc) {
     fclose(declarationsFile);
 
     free(candidateNumbers);
-    freeHashTable(candidates);
-    freeHashTable(candidateSecretKeys);
+    printf("DEBUG candidatenumbers freed\n");
+    deleteHashTable(existingKeys);
+    printf("DEBUG existingKeys freed\n");
+    deleteHashTable(candidates);
+    printf("DEBUG candidates freed\n");
+    deleteHashTable(candidateSecretKeys);
+    printf("DEBUG candidateSecretKeys freed\n");
 }
 
 /*
@@ -272,7 +335,6 @@ void delete_cell_protected(CellProtected *cellProtected) {
 
 void delete_cell_protected_shallow(CellProtected *cellProtected) {
     if (!cellProtected) return;
-    freeProtected(cellProtected->data);
     free(cellProtected);
 }
 

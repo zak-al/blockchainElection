@@ -26,8 +26,7 @@ void addChild(CellTree* parent,CellTree* child){
     updateHeight(parent, child);
 }
 
-void printTree(CellTree* cellTree){
-
+void printTree(CellTree* cellTree) {
     printf("La hauteur est %d, la veleur hachée est %s", cellTree->height, cellTree->block->hash);
 
     if(cellTree->nextBro){

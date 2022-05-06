@@ -7,7 +7,6 @@
 #include <stdio.h>
 #include "Arborescence.h"
 
-
 /*
  * ======== TESTS PARTIE 1 ========
  */
@@ -121,7 +120,6 @@ void test_rsa() {
  * ======== TESTS PARTIES 2 ET 3 ========
  */
 
-
 /*
  * Vérifie les fonctions de passage d'une structure à une chaîne
  * et de retour à la structure fonctionnent correctement.
@@ -176,7 +174,7 @@ void tests_str(int nbTests) {
  */
 void hashTableTest(int nbTests) {
     for (int i = 0; i < nbTests; ++i) {
-        __HashTable *hashTable = DEPRECATED_initHashTable(2 * i + 1);
+        DEPRECATED__HashTable *hashTable = DEPRECATED_initHashTable(2 * i + 1);
         if (!hashTable) {
             fprintf(stderr, "[hashTableTest / création de la table] ERREUR !");
             continue;
@@ -185,7 +183,7 @@ void hashTableTest(int nbTests) {
             Key *key = malloc(sizeof(Key));
             Key *key2 = malloc(sizeof(Key));
             init_pair_keys(key, key2, 7, 15);
-            add(hashTable, j, key);
+            DEPRECATED_add(hashTable, j, key);
 
             if (!DEPRECATED_hashTableContains(hashTable, j)) {
                 fprintf(stderr, "[hashTableTest / test1] ERREUR !");
@@ -199,7 +197,7 @@ void hashTableTest(int nbTests) {
                 fprintf(stderr, "[hashTableTest / test3] ERREUR !");
             }
 
-            set(hashTable, j, key2);
+            DEPRECATED_set(hashTable, j, key2);
 
             if (!keysEqual(DEPRECATED_get(hashTable, j), key2)) {
                 fprintf(stderr, "[hashTableTest / test4] ERREUR !");
@@ -208,7 +206,7 @@ void hashTableTest(int nbTests) {
             freeKey(key);
             freeKey(key2);
         }
-        freeHashTable(hashTable);
+        DEPRECATED_freeHashTable(hashTable);
     }
 }
 
@@ -281,12 +279,58 @@ void testFourni() {
 
 void testSSL() {
     const char *s = "Rosetta code";
-    unsigned char *d = (unsigned char*) SHA256( (const unsigned char*) s, strlen(s),0);
-    int i;
-    for (i = 0; i < SHA256_DIGEST_LENGTH; i++){
-        printf("%02x",d[i]);
+    unsigned char d[SHA256_DIGEST_LENGTH];
+    SHA256((const unsigned char*) s, strlen(s),d);
+
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++){
+        printf("%02x", d[i]);
     }
     putchar('\n');
+}
+
+void testArborescence() {
+
+}
+
+void testWriteBlockReadBlock() {
+    printf("hibou\n");
+    generate_random_data(10, 3);
+    printf("test\n");
+    CellProtected* declarations = read_protected();
+    printf("declarations initialised\n");
+    CellKey* voters = read_public_keys("keys.txt");
+    printf("voters initialised\n");
+    Key* author1 = voters->data;
+    Key* author2 = voters->next->data;
+
+    Block* block1 = malloc(sizeof(Block));
+    Block* block1verif = malloc(sizeof(Block));
+    Block* block2 = malloc(sizeof(Block));
+    Block* block2verif = malloc(sizeof(Block));
+
+    printf("blocks allocated\n");
+
+    block1->hash = NULL;
+    block1->previous_hash = NULL;
+    block1->author = author1;
+    block1->votes = declarations;
+    compute_proof_of_work(block1, 2);
+
+    printf("TEST Proof of work computed");
+    writeBlock("block1.txt", block1);
+
+    freeBlockShallow(block1);
+    printf("block1 freed\n");
+    freeBlock(block1verif);
+    printf("block1verif freed\n");
+    freeBlock(block2);
+    printf("block2 freed\n");
+    freeBlockShallow(block2verif);
+    printf("blockVerif freed\n");
+    delete_list_keys(voters);
+    printf("voters freed\n");
+    delete_list_protected(declarations);
+    printf("declarations freed\n");
 }
 
 void test_blockchian() {
@@ -295,12 +339,13 @@ void test_blockchian() {
 
     // On rend la première déclaration frauduleuse pour tester la fonction de filtrage anti-fraude.
     declarations->data->message[0]++;
-    printf("Liste des déclarations :\n");
-    print_list_protected(declarations);
-    declarations = delete_liste_fraude(declarations);
-    printf("\n\n\nListe des déclarations après filtre anti-fraude :\n");
-    print_list_protected(declarations);
-    delete_list_protected(declarations);
+
+    //printf("Liste des déclarations :\n");
+    //print_list_protected(declarations);
+    //declarations = delete_liste_fraude(declarations);
+    //printf("\n\n\nListe des déclarations après filtre anti-fraude :\n");
+    //print_list_protected(declarations);
+    //delete_list_protected(declarations);
 
     /*while (declarations) {
         submit_vote(declarations->data);
@@ -331,6 +376,12 @@ void test_blockchian() {
 
 int main(void) {
     srand(time(NULL));
+
+    //generate_random_data(10, 3);
+
+    testWriteBlockReadBlock();
+
+    return 0;
     printf("\tTest Blockchain.\n");
     test_blockchian();
     printf("\tTerminé.\n");
@@ -343,7 +394,7 @@ int main(void) {
     printf("Tests str_to_key et key_to_str.\n");
     tests_str(250);
     printf("\tTerminé.\n");
-    printf("Tests __HashTable.\n");
+    printf("Tests DEPRECATED__HashTable.\n");
     hashTableTest(25);
     printf("\tTerminé.\n");
     printf("Génération des données de vote.\n");*/

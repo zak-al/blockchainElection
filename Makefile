@@ -1,5 +1,5 @@
 tests: tests.o voting.o HashTable.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o DEPRECATED_hashset.o Arborescence.o
-	gcc tests.o voting.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o DEPRECATED_hashset.o Arborescence.o -o tests -lssl -lcrypto
+	gcc -Wall tests.o voting.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o DEPRECATED_hashset.o Arborescence.o -o tests -lssl -lcrypto
 
 tests.o: tests.c voting.c
 	gcc -Wall -c tests.c
