@@ -4,6 +4,25 @@
 #include <stdio.h>
 #include <openssl/sha.h>
 
+void DEBUG_printHashHex(const unsigned char* hash) {
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+        printf("%x", hash[i]);
+    }
+
+    printf("\n");
+}
+
+void writeHash(const unsigned char* hash, FILE* file) {
+    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
+        fprintf(file, "%d ", hash[i]);
+    }
+}
+
+/**
+ * @brief Libère le bloc, son hash, le hash précédent et la structure de la liste de déclarations,
+ * i.e. sans libérer les déclarations.
+ * @param block Le bloc à libérer.
+ */
 void freeBlock(Block* block) {
     if (!block) return;
 
@@ -13,12 +32,38 @@ void freeBlock(Block* block) {
     free(block);
 }
 
-void writeBlock(char* filename, Block* block){
+/**
+ * @brief Libère le bloc, son hash et le hash précédent. En particulier, ne libère pas la liste des déclarations
+ * (ni la structure, ni le contenu).
+ * @param block Le bloc à libérer.
+ */
+void freeBlockShallow(Block* block) {
+    printf("============ DEBUG FREE BLOCK (SHALLOW) %p ============\n", block);
+    if (!block) return;
+    free(block->hash);
+    printf("\thash freed\n");
+    free(block->previous_hash);
+    printf("\tprevious hash freed\n");
+    free(block);
+    printf("\tblock freed\n");
+}
+
+/**
+ * @brief Écrit un fichier dans un bloc.
+ * @param filename Nom du fichier dans lequel écrire. Sera créé si inexistant, écrasé si existant.
+ * @param block Le bloc à écrire.
+ */
+void writeBlock(char* filename, Block* block) {
     FILE* file = fopen(filename, "w");
-    char* block_str = blockToStr(block);
-    fprintf(file,"%s/%s\n", block->hash, block_str);
+    unsigned char* block_str = blockToStr(block);
+    writeHash(block->hash, file);
+    fprintf(file,"/%s\n", block_str);
     free(block_str);
     fclose(file);
+}
+
+Block* readBlock(char* filename, Block* block) {
+
 }
 
 unsigned char* blockToStr(Block* block) {
@@ -102,32 +147,57 @@ unsigned char* strToHash(const unsigned char* str){
     return SHA256(str, strlen((char*) str),0);
 }
 
-int startsWithDZeros(const char* string, int d) {
+int startsWithDZeros(const unsigned char* string, int d) {
+    printf("DEBUG start of startsWithDZeros : string = ");
+    DEBUG_printHashHex(string);
+
     while (d > 0) {
         --d;
-        if (string[d] != '0') {
+        if (string[d] != 0) {
             return FALSE;
         }
     }
+
+    printf("DEBUG end of startsWithDZeros : string = ");
+    DEBUG_printHashHex(string);
+
     return TRUE;
 }
 
 void compute_proof_of_work(Block* b, int d) {
-    int bd = 4 * d;
-
     b->nonce = 0;
     while (TRUE) {
-        ++(b->nonce);
         unsigned char* str = blockToStr(b);
-        unsigned char* hash = SHA256(str, strlen(str), 0);
-        if (startsWithDZeros(hash, bd)) {
+        unsigned char* hash = calloc(SHA256_DIGEST_LENGTH, sizeof(unsigned char));
+
+        if (!hash) {
+            fprintf(stderr, "[compute_proof_of_work] Erreur lors de l'allocation de la mémoire :(\n");
             free(str);
+            continue;
+        }
+
+        if (!str) {
             free(hash);
+            continue;
+        }
+
+        SHA256(str, strlen((const char*) str), hash);
+
+        printf("DEBUG hash = ");
+        DEBUG_printHashHex(hash);
+
+        if (startsWithDZeros(hash, d)) {
+            printf("\tDEBUG hash = ");
+            DEBUG_printHashHex(hash);
+            b->hash = hash;
+            free(str);
             return;
         }
 
         free(str);
         free(hash);
+        ++(b->nonce);
+
     }
 }
 
@@ -146,14 +216,10 @@ Block* copyBlock(Block* orig) {
 }
 
 int verify_block(Block* B, int d){
-    char* res = blockToStr(B);
-    unsigned char* hash = SHA256(res,strlen(res),0);
-    for(int i = 0; i < 4*d; i++){
-        if(hash[i] != 0){
-            return FALSE;
-        }
-    }
-    free(res);
+    unsigned char* str = blockToStr(B);
+    unsigned char* hash = SHA256(str, strlen((const char*) str), 0);
+    int s = startsWithDZeros( hash, 4 * d);
+    free(str);
     free(hash);
-    return TRUE;
+    return s;
 }

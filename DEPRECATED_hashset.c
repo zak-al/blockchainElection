@@ -5,7 +5,7 @@ long long int DEPRECATED_hash(unsigned long long key, size_t capacity) {
     return key mod capacity;
 }
 
-Key *DEPRECATED_listContains(__List *head, int key) {
+Key *DEPRECATED_listContains(DEPRECATED__List *head, int key) {
     while (head) {
         if (key == head->key) {
             return copyKey(head->value);
@@ -16,8 +16,8 @@ Key *DEPRECATED_listContains(__List *head, int key) {
     return NULL;
 }
 
-__HashTable *DEPRECATED_initHashTable(size_t capacity) {
-    __HashTable *hashTable = malloc(sizeof(__HashTable));
+DEPRECATED__HashTable *DEPRECATED_initHashTable(size_t capacity) {
+    DEPRECATED__HashTable *hashTable = malloc(sizeof(DEPRECATED__HashTable));
 
     if (!hashTable) {
         fprintf(stderr, "[DEPRECATED_initHashTable] Erreur lors de l'allocation du tableau :(\n");
@@ -26,7 +26,7 @@ __HashTable *DEPRECATED_initHashTable(size_t capacity) {
 
     hashTable->length = 0;
     hashTable->capacity = capacity;
-    hashTable->tab = calloc(capacity, sizeof(__List *));
+    hashTable->tab = calloc(capacity, sizeof(DEPRECATED__List *));
 
     if (!hashTable->tab) {
         fprintf(stderr, "[DEPRECATED_initHashTable] Erreur lors de l'allocation du tableau :(\n");
@@ -37,19 +37,19 @@ __HashTable *DEPRECATED_initHashTable(size_t capacity) {
     return hashTable;
 }
 
-int DEPRECATED_hashTableContains(__HashTable *hashTable, int key) {
+int DEPRECATED_hashTableContains(DEPRECATED__HashTable *hashTable, int key) {
     long long h = DEPRECATED_hash(key, hashTable->capacity);
     return DEPRECATED_listContains(hashTable->tab[h], key) != NULL;
 }
 
-Key *DEPRECATED_get(__HashTable *hashTable, int key) {
+Key *DEPRECATED_get(DEPRECATED__HashTable *hashTable, int key) {
     long long h = DEPRECATED_hash(key, hashTable->capacity);
     return DEPRECATED_listContains(hashTable->tab[h], key);
 }
 
-void set(__HashTable *hashTable, int key, Key *new) {
+void DEPRECATED_set(DEPRECATED__HashTable *hashTable, int key, Key *new) {
     long long h = DEPRECATED_hash(key, hashTable->capacity);
-    __List *l = hashTable->tab[h];
+    DEPRECATED__List *l = hashTable->tab[h];
     while (l) {
         if (l->key == key) {
             freeKey(l->value);
@@ -60,12 +60,12 @@ void set(__HashTable *hashTable, int key, Key *new) {
     }
 }
 
-void add(__HashTable *hashTable, int key, Key *value) {
+void DEPRECATED_add(DEPRECATED__HashTable *hashTable, int key, Key *value) {
     long long h = DEPRECATED_hash(key, hashTable->capacity);
 
-    __List *newCell = malloc(sizeof(__List));
+    DEPRECATED__List *newCell = malloc(sizeof(DEPRECATED__List));
     if (!newCell) {
-        fprintf(stderr, "[add] Erreur lors de l'allocation de newCell :(\n");
+        fprintf(stderr, "[DEPRECATED_add] Erreur lors de l'allocation de newCell :(\n");
         return;
     }
 
@@ -75,20 +75,20 @@ void add(__HashTable *hashTable, int key, Key *value) {
     hashTable->tab[h] = newCell;
 }
 
-void freeHashTableListCell(__List *list) {
+void DEPRECATED_freeHashTableListCell(DEPRECATED__List *list) {
     if (!list) return;
     freeKey(list->value);
     free(list);
 }
 
-void freeHashTable(__HashTable *hashTable) {
+void DEPRECATED_freeHashTable(DEPRECATED__HashTable *hashTable) {
     if (!hashTable) return;
 
     for (int i = 0; i < hashTable->capacity; ++i) {
-        __List *l = hashTable->tab[i];
+        DEPRECATED__List *l = hashTable->tab[i];
         while (l) {
-            __List *tail = l->tail;
-            freeHashTableListCell(l);
+            DEPRECATED__List *tail = l->tail;
+            DEPRECATED_freeHashTableListCell(l);
             l = tail;
         }
     }

@@ -7,7 +7,7 @@
  * @param y A key
  * @return an integer representing true if x and y are equal, false otherwise.
  */
-int keysEqual(Key *x, Key *y) {
+int keysEqual(const Key* x, const Key* y) {
     return (x->n == y->n && x->val == y->val);
 }
 
@@ -16,7 +16,7 @@ int keysEqual(Key *x, Key *y) {
  * @param key A key.
  * @return A dynamically-allocated copy of `key`.
  */
-Key *copyKey(Key *key) {
+Key *copyKey(const Key *key) {
     Key *copy = malloc(sizeof(Key));
     if (!copy) {
         fprintf(stderr, "[copyKey] Erreur lors l'allocation :(\n");
@@ -57,7 +57,7 @@ long extended_gcd(long s, long t, long *u, long *v) {
  * @param s pointeur qui prendra le paramètre s de la clé publique
  * @param u pointeur qui prendra la paramètre u de la clé privée, i.e. l'inverse modulo n de s
  * \~english
- * @brief Determines the public key (s, n) and the private key (u, n) in terms of to prime numbers passed as parameters, p and q.
+ * @brief Determines the public key (s, n) and the private key (u, n) in terms of two prime numbers passed as parameters, p and q.
  * @param p a randomly-generated, large prime number
  * @param q another randomly-generated large prime number, different to p
  * @param n pointer that is to take the value of the modulo, n, i.e. p*q
@@ -120,7 +120,7 @@ long *encrypt(const char *string, long s, long n) {
  * @param n paramètre n (modulo)
  * @return la valeur en clair de la chaîne chiffrée contenue dans le premier paramètre, terminée par le caractère nul
  *
- * \~french
+ * \~english
  * @brief Decrypts a string
  * @param string representation of an encrypted string, as returned by the function encrypt
  * @param size number of elements in the parameter string
@@ -164,19 +164,14 @@ void init_pair_keys(Key *pKey, Key *sKey, int low_size, int up_size) {
 }
 
 char *key_to_str(Key *key) {
-    printf("11\n");
     char *repr = malloc((max(key->n / 16 + 1, key->val / 16 + 1) + 5) * 2);
     if (!repr) {
         fprintf(stderr, "[key_to_str] Erreur lors l'allocation de la représentation de la clé :(\n");
         return NULL;
     }
 
-    printf("22\n");
-
     sprintf(repr, "(%lx, %lx)", key->val, key->n);
     repr = realloc(repr, (strlen(repr) + 1) * sizeof(char));
-
-    printf("3\n");
 
     return repr;
 }
@@ -195,5 +190,6 @@ Key *str_to_key(char *repr) {
 }
 
 void freeKey(Key *key) {
+    printf("============ DEBUG FREE KEY %p ============\n", key);
     free(key);
 }

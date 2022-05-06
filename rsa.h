@@ -10,11 +10,11 @@ typedef struct {
     long n;
 } Key;
 
-int keysEqual(Key* x, Key* y);
+int keysEqual(const Key* x, const Key* y);
 
 size_t max(long x, long y);
 
-Key* copyKey(Key* key);
+Key* copyKey(const Key *key);
 
 long extended_gcd(long s, long t, long* u, long* v);
 void generate_key_values(long p, long q, long* n, long* s, long* u);
