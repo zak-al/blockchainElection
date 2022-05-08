@@ -327,6 +327,35 @@ void delete_list_keys(CellKey *cellKey) {
     }
 }
 
+int cellProtectedEqual(const CellProtected* one, const CellProtected* two) {
+    while (one && two) {
+        if (!protectedEqual(one->data, two->data)) {
+            return FALSE;
+        } else {
+            one = one->next;
+            two = two->next;
+        }
+    }
+
+    if (one || two) {
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+CellProtected* reverseCellProteted(CellProtected* list) {
+    CellProtected* res = NULL;
+    while (list) {
+        CellProtected* next = list->next;
+        list->next = res;
+        res = list;
+        list = next;
+    }
+
+    return res;
+}
+
 void delete_cell_protected(CellProtected *cellProtected) {
     if (!cellProtected) return;
     freeProtected(cellProtected->data);

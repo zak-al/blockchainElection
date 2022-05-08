@@ -18,7 +18,13 @@ typedef struct {
 
 // Question 7.1
 void writeBlock(char* filename, Block* block);
-Block* readBlock(char* filename, Block* block);
+Block* readBlock(char* filename);
+int blocksEqual(const Block* b1, const Block* b2);
+
+void DEBUG_printHashHex(const unsigned char* hash);
+
+void writeHash(const unsigned char* hash, FILE* file);
+unsigned char* readHash(const char* hash);
 
 void freeBlock(Block* block);
 void freeBlockShallow(Block* block);

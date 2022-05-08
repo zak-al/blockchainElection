@@ -54,6 +54,9 @@ void delete_cell_key(CellKey *cellKey);
 
 void delete_list_keys(CellKey *cellKey);
 
+int cellProtectedEqual(const CellProtected* one, const CellProtected* two);
+
+CellProtected* reverseCellProteted(CellProtected* list);
 /*
  * =========== EXERCICE 6 ===========
  */

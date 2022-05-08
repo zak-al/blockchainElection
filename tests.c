@@ -292,11 +292,35 @@ void testArborescence() {
 
 }
 
+/**
+ * @brief Termine la liste passée en paramètre à la position i
+ * et renvoit un pointeur vers la liste commençant à l'élément à la position i + 1.
+ * On suppose que la liste passée en paramètre ne se termine pas avant la position i.
+ */
+CellProtected* splitList(CellProtected* list, int i) {
+    while (i > 1) {
+        --i;
+        list = list->next;
+    }
+    CellProtected* res = list->next;
+    list->next = NULL;
+    return res;
+}
+
 void testWriteBlockReadBlock() {
+    int d = 1;
+
     printf("hibou\n");
     generate_random_data(10, 3);
     printf("test\n");
     CellProtected* declarations = read_protected();
+    CellProtected* declarations2 = splitList(declarations, 5);
+
+    print_list_protected(declarations);
+    printf("\n\n");
+    print_list_protected(declarations2);
+    printf("\n\n");
+
     printf("declarations initialised\n");
     CellKey* voters = read_public_keys("keys.txt");
     printf("voters initialised\n");
@@ -304,9 +328,9 @@ void testWriteBlockReadBlock() {
     Key* author2 = voters->next->data;
 
     Block* block1 = malloc(sizeof(Block));
-    Block* block1verif = malloc(sizeof(Block));
+    Block* block1verif;
     Block* block2 = malloc(sizeof(Block));
-    Block* block2verif = malloc(sizeof(Block));
+    Block* block2verif;
 
     printf("blocks allocated\n");
 
@@ -314,10 +338,60 @@ void testWriteBlockReadBlock() {
     block1->previous_hash = NULL;
     block1->author = author1;
     block1->votes = declarations;
-    compute_proof_of_work(block1, 2);
 
-    printf("TEST Proof of work computed");
+    printf("TEST Computing proof of work\n");
+    compute_proof_of_work(block1, d);
+    printf("\tdone\n");
+
+    printf("TEST Verifying block1\n");
+    printf("\t%s\n", verify_block(block1, d) ? "OK" : "ERROR");
+
+    printf("TEST Writing block1\n");
     writeBlock("block1.txt", block1);
+    printf("\tdone\n");
+
+    printf("TEST Reading block1 into block1verif\n");
+    block1verif = readBlock("block1.txt");
+    printf("\tdone\n");
+
+    printf("block1.hash = ");
+    DEBUG_printHashHex(block1->hash);
+    printf("\n");
+
+    printf("block1 = block1verif ? %s\n", blocksEqual(block1, block1verif) ? "TRUE" : "FALSE");
+    writeBlock("block1verif.txt", block1verif);
+
+    printf("Votes in block1:\n");
+    print_list_protected(block1->votes);
+    printf("\n");
+
+    block2->hash = NULL;
+    block2->previous_hash = (unsigned char*) strdup((const char*) block1->hash);
+    block2->author = author2;
+    block2->votes = declarations2;
+
+    compute_proof_of_work(block2, d);
+
+    printf("block2.hash = ");
+    DEBUG_printHashHex(block2->hash);
+    printf("\n");
+
+    printf("TEST Verifying block2\n");
+    printf("\t%s\n", verify_block(block2, d) ? "OK" : "ERROR");
+    printf("TEST Writing block2\n");
+    writeBlock("block2.txt", block2);
+    printf("\tdone\n");
+    printf("Votes in block2:\n");
+    print_list_protected(block2->votes);
+    printf("\n");
+
+    printf("TEST Reading block2 into block2verif\n");
+    block2verif = readBlock("block2.txt");
+    printf("\tdone\n");
+
+    printf("block2 = block2verif ? %s\n", blocksEqual(block2, block2verif) ? "TRUE" : "FALSE");
+    printf("block2.previousHash = block1.hash ? %s\n", strcmp((const char*) block2->previous_hash, (const char*) block1->hash) == 0 ? "TRUE" : "FALSE");
+    writeBlock("block2verif.txt", block2verif);
 
     freeBlockShallow(block1);
     printf("block1 freed\n");

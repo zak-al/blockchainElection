@@ -34,15 +34,15 @@ void htIkAdd(const HashTable* table, int key, const Key* value) {
 }
 
 size_t htIkFindPosition(const HashTable* t, int key) {
-    printf("DEBUG htikfindpos\n");
+    //printf("DEBUG htikfindpos\n");
     size_t idx = hashInt(key, t->capacity);
-    printf("DEBUG idx = %ld\n", idx);
+    //printf("DEBUG idx = %ld\n", idx);
 
-// On cherche tant qu'on ne tombe ni sur une case nulle
-// ni sur une case déjà occupée par la clé désirée.
+    // On cherche tant qu'on ne tombe ni sur une case nulle
+    // ni sur une case déjà occupée par la clé désirée.
     while (t->array[idx] != NULL && t->array[idx]->integer != key) {
         idx = (idx + 1) mod t->capacity;
-        printf("DEBUG idx now: %ld\n", idx);
+        //printf("DEBUG idx now: %ld\n", idx);
     }
     return idx;
 }
@@ -54,9 +54,9 @@ size_t htIkFindPosition(const HashTable* t, int key) {
 * @return TRUE si une telle entrée existe, FALSE sinon.
 */
 int htIkExists(HashTable* table, int key) {
-    printf("DEBUG exists?\n");
+    //printf("DEBUG exists?\n");
     size_t idx = htIkFindPosition(table, key);
-    printf("DEBUG idx\n");
+    //printf("DEBUG idx\n");
     if (table->array[idx] == NULL) return FALSE;
     return TRUE;
 }
@@ -203,21 +203,21 @@ Key* htKiArgmax(HashTable* hashTable) {
 void deleteHashCell(HashTableCell* hashCell) {
     if (!hashCell) return;
     freeKey(hashCell->key);
-    printf("\tDEBUG key deleted\n");
+    //printf("\tDEBUG key deleted\n");
     free(hashCell);
-    printf("\tDEBUG hash cell deleted\n");
+    //printf("\tDEBUG hash cell deleted\n");
 }
 
 void deleteHashTable(HashTable* hashTable) {
     if (!hashTable) return;
 
     for (int i = 0; i < hashTable->capacity; i++) {
-        printf("DEBUG deleting hash cell\n");
+        //printf("DEBUG deleting hash cell\n");
         deleteHashCell(hashTable->array[i]);
-        printf("\tDEBUG deleted\n");
+        //printf("\tDEBUG deleted\n");
     }
     free(hashTable->array);
-    printf("DEBUG array deleted\n");
+    //printf("DEBUG array deleted\n");
     free(hashTable);
-    printf("DEBUG hashtable deleted\n");
+    //printf("DEBUG hashtable deleted\n");
 }
