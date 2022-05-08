@@ -149,7 +149,7 @@ void add_block(int d, char* name){
     char* str = NULL;
 
     // todo
-    fgets(str, 18000, fic);
+    fgets(str, 5000, fic);
     Block* b = strToBlock(str);
 
     if(verify_block(b, d)){
