@@ -27,7 +27,7 @@ void addChild(CellTree* parent,CellTree* child){
 }
 
 void printTree(CellTree* cellTree) {
-    printf("La hauteur est %d, la veleur hachée est %s", cellTree->height, cellTree->block->hash);
+    printf("La hauteur est %d, la veleur hachée est %s \n", cellTree->height, cellTree->block->hash);
 
     if(cellTree->nextBro){
         printTree(cellTree->nextBro);
@@ -44,6 +44,7 @@ void deleteNode(CellTree* node){
 
 
 void deleteCellTree(CellTree* cellTree){
+    //todo corriger
     if(cellTree->nextBro){
         deleteCellTree(cellTree->nextBro);
     }

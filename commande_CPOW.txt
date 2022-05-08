@@ -1,0 +1,4 @@
+plot "sortieTime_CPOW.txt" using 1:2 title 'CPOW' with lines
+set term postscript portrait
+set output "courbe_CPOW.ps"
+set size 0.7, 0.7

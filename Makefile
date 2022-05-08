@@ -1,6 +1,12 @@
 tests: tests.o voting.o HashTable.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o DEPRECATED_hashset.o Arborescence.o
 	gcc -Wall tests.o voting.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o DEPRECATED_hashset.o Arborescence.o -o tests -lssl -lcrypto
 
+test_CPOW: test_CPOW.o voting.o HashTable.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o DEPRECATED_hashset.o Arborescence.o
+	gcc -Wall test_CPOW.o voting.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o DEPRECATED_hashset.o Arborescence.o -o test_CPOW -lssl -lcrypto
+
+test_CPOW.o: test_CPOW.c
+	gcc -Wall -c test_CPOW.c
+
 tests.o: tests.c voting.c
 	gcc -Wall -c tests.c
 
@@ -32,4 +38,4 @@ DEPRECATED_hashset.o: DEPRECATED_hashset.c DEPRECATED_hashset.h
 	gcc -Wall -c DEPRECATED_hashset.c
 
 clean:
-	rm -rf *.o
+	rm -rf *.o tests test_CPOW

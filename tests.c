@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "Arborescence.h"
 
+
 /*
  * ======== TESTS PARTIE 1 ========
  */
@@ -120,6 +121,7 @@ void test_rsa() {
  * ======== TESTS PARTIES 2 ET 3 ========
  */
 
+
 /*
  * Vérifie les fonctions de passage d'une structure à une chaîne
  * et de retour à la structure fonctionnent correctement.
@@ -172,9 +174,9 @@ void tests_str(int nbTests) {
 /*
  * Test des opérations de la table de hachage.
  */
-void hashTableTest(int nbTests) {
+/*void hashTableTest(int nbTests) {
     for (int i = 0; i < nbTests; ++i) {
-        DEPRECATED__HashTable *hashTable = DEPRECATED_initHashTable(2 * i + 1);
+        __HashTable *hashTable = DEPRECATED_initHashTable(2 * i + 1);
         if (!hashTable) {
             fprintf(stderr, "[hashTableTest / création de la table] ERREUR !");
             continue;
@@ -183,7 +185,7 @@ void hashTableTest(int nbTests) {
             Key *key = malloc(sizeof(Key));
             Key *key2 = malloc(sizeof(Key));
             init_pair_keys(key, key2, 7, 15);
-            DEPRECATED_add(hashTable, j, key);
+            add(hashTable, j, key);
 
             if (!DEPRECATED_hashTableContains(hashTable, j)) {
                 fprintf(stderr, "[hashTableTest / test1] ERREUR !");
@@ -197,7 +199,7 @@ void hashTableTest(int nbTests) {
                 fprintf(stderr, "[hashTableTest / test3] ERREUR !");
             }
 
-            DEPRECATED_set(hashTable, j, key2);
+            set(hashTable, j, key2);
 
             if (!keysEqual(DEPRECATED_get(hashTable, j), key2)) {
                 fprintf(stderr, "[hashTableTest / test4] ERREUR !");
@@ -206,9 +208,9 @@ void hashTableTest(int nbTests) {
             freeKey(key);
             freeKey(key2);
         }
-        DEPRECATED_freeHashTable(hashTable);
+        freeHashTable(hashTable);
     }
-}
+}*/
 
 void test_read() {
     CellKey *voterKeys = read_public_keys("keys.txt");
@@ -279,17 +281,110 @@ void testFourni() {
 
 void testSSL() {
     const char *s = "Rosetta code";
-    unsigned char d[SHA256_DIGEST_LENGTH];
-    SHA256((const unsigned char*) s, strlen(s),d);
-
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; i++){
-        printf("%02x", d[i]);
+    unsigned char *d = (unsigned char*) SHA256( (const unsigned char*) s, strlen(s),0);
+    int i;
+    for (i = 0; i < SHA256_DIGEST_LENGTH; i++){
+        printf("%02x",d[i]);
     }
     putchar('\n');
 }
 
 void testArborescence() {
+//la creation de block pour test
+    Block* testBlock = malloc(sizeof(Block));
+    Key* blockKey = malloc(sizeof(Key));
+    init_key(blockKey, 10, 9);
+    CellProtected* blockVote = read_protected("declarations.txt");
+    char* hash = "123456";
+    char* previoushash = "1234";
 
+    testBlock -> author = blockKey;
+    testBlock -> votes = blockVote;
+    testBlock -> hash = (unsigned char *)strdup(hash);
+    testBlock -> previous_hash = (unsigned char *)strdup(previoushash);
+    testBlock -> nonce = 0;
+
+    //les tests pour writeBlock
+    remove("Pending_block.txt");
+    writeBlock("Pending_block.txt",testBlock);
+    //les tests pour blockToStr
+    char* block_str = blockToStr(testBlock);
+    printf("%s\n", block_str);
+
+    //les tests pour creatNode
+    CellTree* ct = createNode(testBlock);
+
+    //les tests pour printTree et addChild
+    printTree(ct);
+    addChild(ct, createNode(testBlock));
+    addChild(ct, createNode(testBlock));
+    addChild(ct, createNode(testBlock));
+    addChild(ct, createNode(testBlock));
+    CellTree *ct_high = highestChild(ct);
+    printf("printTree2***************\n");
+    printTree(ct);
+    printf("printTree3 *********************************\n");
+    printTree(ct_high);
+    printf("fin du print *****************\n");
+
+    //tests pour creation_block
+    //CellTree* last = lastNode(ct);
+    //printTree(last);
+
+    //deleteCellTree(ct);
+    freeBlock(testBlock);
+    free(block_str);
+    //Block *readB = readBlock("Pending_block.txt");
+
+    //printf("%ld,%ld %s %s %d\n", readB -> author -> val, readB -> author -> n, readB -> hash, readB -> previous_hash, readB -> nonce);
+
+    //print_list_protected(readB -> votes);
+    //char* strblock = blockToStr(readB);
+    //printf("%s\n", strblock);
+
+    CellProtected* declarations = read_protected();
+    CellKey* vote = read_public_keys("keys.txt");
+    int d = 10;
+
+    while(declarations) {
+        //avec la creation d’un bloc valide tous les 10 votes soumis
+        for (int i = 0; i < d; i++) {
+            if (declarations == NULL) {
+                continue;
+            }
+            submit_vote(declarations->data);
+            declarations = declarations->next;
+        }
+
+        create_block(ct, vote->data, d);
+
+        char *name = key_to_str(vote->data);
+        vote = vote->next;
+
+        sprintf(name, "%s.txt", name);
+        //suivi directement par l’ajout du bloc dans la blockchain
+        add_block(d, name);
+
+
+        free(name);
+    }
+}
+
+void test_StrToHash(){
+    //tests pour strToHash()
+    const char* s1 = "Rosetta code";
+    unsigned char* s0 = SHA256(s1, strlen(s1), 0);
+    int i;
+    for (i = 0; i < SHA256_DIGEST_LENGTH; i++){
+        printf("%02x", s0[i]);
+    }
+    putchar( '\n');
+
+    unsigned char* s2 = strToHash(s1);
+    for (i = 0; i < SHA256_DIGEST_LENGTH; i++){
+        printf("%02x", s2[i]);
+    }
+    putchar( '\n');
 }
 
 /**
@@ -358,7 +453,7 @@ void testWriteBlockReadBlock() {
     DEBUG_printHashHex(block1->hash);
     printf("\n");
 
-    printf("block1 = block1verif ? %s\n", blocksEqual(block1, block1verif) ? "TRUE" : "FALSE");
+    //printf("block1 = block1verif ? %s\n", blocksEqual(block1, block1verif) ? "TRUE" : "FALSE");
     writeBlock("block1verif.txt", block1verif);
 
     printf("Votes in block1:\n");
@@ -389,7 +484,7 @@ void testWriteBlockReadBlock() {
     block2verif = readBlock("block2.txt");
     printf("\tdone\n");
 
-    printf("block2 = block2verif ? %s\n", blocksEqual(block2, block2verif) ? "TRUE" : "FALSE");
+    //printf("block2 = block2verif ? %s\n", blocksEqual(block2, block2verif) ? "TRUE" : "FALSE");
     printf("block2.previousHash = block1.hash ? %s\n", strcmp((const char*) block2->previous_hash, (const char*) block1->hash) == 0 ? "TRUE" : "FALSE");
     writeBlock("block2verif.txt", block2verif);
 
@@ -413,13 +508,12 @@ void test_blockchian() {
 
     // On rend la première déclaration frauduleuse pour tester la fonction de filtrage anti-fraude.
     declarations->data->message[0]++;
-
-    //printf("Liste des déclarations :\n");
-    //print_list_protected(declarations);
-    //declarations = delete_liste_fraude(declarations);
-    //printf("\n\n\nListe des déclarations après filtre anti-fraude :\n");
-    //print_list_protected(declarations);
-    //delete_list_protected(declarations);
+    printf("Liste des déclarations :\n");
+    print_list_protected(declarations);
+    declarations = delete_liste_fraude(declarations);
+    printf("\n\n\nListe des déclarations après filtre anti-fraude :\n");
+    print_list_protected(declarations);
+    delete_list_protected(declarations);
 
     /*while (declarations) {
         submit_vote(declarations->data);
@@ -451,24 +545,24 @@ void test_blockchian() {
 int main(void) {
     srand(time(NULL));
 
-    //generate_random_data(10, 3);
+    printf("\tTest Arborescene.\n");
+    testArborescence();
+    printf("\tTerminé.\n");
 
-    testWriteBlockReadBlock();
+    /*printf("\tTest strtohash.\n");
+        test_StrToHash();
+    printf("\tTerminé.\n");
 
-    return 0;
     printf("\tTest Blockchain.\n");
     test_blockchian();
     printf("\tTerminé.\n");
 
-
-
-
-    /*test_modpow(10000);
+    test_modpow(10000);
 
     printf("Tests str_to_key et key_to_str.\n");
     tests_str(250);
     printf("\tTerminé.\n");
-    printf("Tests DEPRECATED__HashTable.\n");
+    printf("Tests __HashTable.\n");
     hashTableTest(25);
     printf("\tTerminé.\n");
     printf("Génération des données de vote.\n");*/
