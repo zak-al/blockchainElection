@@ -34,7 +34,7 @@ CellTree* createNode(Block* b) {
  * @return
  */
 int updateHeight(CellTree* parent, CellTree* child) {
-    if (child->height + 1 > parent->height){
+    if (child->height + 1 > parent->height) {
         parent->height = child->height + 1;
         return TRUE;
     }
@@ -115,26 +115,6 @@ CellTree* highestChild(const CellTree* cellTree) {
     return argMax;
 }
 
-CellTree* DEPRECATED_highestChild(CellTree* cellTree) {
-    int max = -1;
-    CellTree* high;
-
-    if(cellTree -> firstChild) {
-        CellTree* t = cellTree -> firstChild;
-        CellTree* bro = t;
-        while(bro -> nextBro){
-            if(bro -> height > max){
-                max = bro -> height;
-                high = bro;
-            }
-            bro = bro -> nextBro;
-        }
-        return high;
-    }
-
-    return NULL;
-}
-
 // QUESTION 8.7
 /**
  * @brief Renvoie la valeur hachée de descendant le plus lointain de cellTree.
@@ -143,7 +123,7 @@ CellTree* DEPRECATED_highestChild(CellTree* cellTree) {
  */
 unsigned char* lastNode(const CellTree* cellTree) {
     const CellTree* res = cellTree;
-    while(res->firstChild){
+    while (res->firstChild) {
         res = highestChild(res);
     }
 
@@ -152,7 +132,7 @@ unsigned char* lastNode(const CellTree* cellTree) {
 
 // QUESTION 8.8
 CellProtected* buildLongestDeclarationChain(CellTree* cellTree) {
-    CellProtected *res = cellTree->block->votes;
+    CellProtected* res = cellTree->block->votes;
     cellTree = highestChild(cellTree);
     while (cellTree) {
         res = merge(res, cellTree->block->votes);

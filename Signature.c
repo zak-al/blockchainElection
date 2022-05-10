@@ -1,12 +1,8 @@
-//
-// Created by Zakarie Aloui on 30/03/2022.
-//
-
 #include <stdio.h>
 #include "Signature.h"
 
-long *copyLongArray(const long *array, size_t size) {
-    long *copy = malloc(size * sizeof(long));
+long* copyLongArray(const long* array, size_t size) {
+    long* copy = malloc(size * sizeof(long));
     if (!copy) {
         fprintf(stderr, "[copyLongArray] Erreur lors l'allocation :(\n");
         return NULL;
@@ -19,7 +15,7 @@ long *copyLongArray(const long *array, size_t size) {
     return copy;
 }
 
-void printLongVector(long *result, size_t size) {
+void printLongVector(long* result, size_t size) {
     for (size_t i = 0; i < size - 1; ++i) {
         printf("%lx; ", result[i]);
     }
@@ -31,7 +27,7 @@ void printLongVector(long *result, size_t size) {
     printf("]");
 }
 
-int signaturesEqual(Signature *s1, Signature *s2) {
+int signaturesEqual(Signature* s1, Signature* s2) {
     if (s1->length != s2->length) return FALSE;
 
     for (int i = 0; i < s1->length; ++i) {
@@ -48,8 +44,8 @@ int signaturesEqual(Signature *s1, Signature *s2) {
  * @param size
  * @return
  */
-Signature *initSignature(const long *content, size_t size) {
-    Signature *signature = malloc(sizeof(Signature));
+Signature* initSignature(const long* content, size_t size) {
+    Signature* signature = malloc(sizeof(Signature));
     if (!signature) {
         fprintf(stderr, "[initSignature] : erreur lors de l'allocation de la signature :(\n");
         return NULL;
@@ -61,21 +57,21 @@ Signature *initSignature(const long *content, size_t size) {
     return signature;
 }
 
-Signature *copySignature(Signature *signature) {
+Signature* copySignature(Signature* signature) {
     return initSignature(signature->content, signature->length);
 }
 
 // QUESTION 3.7
-Signature *sign(const char *mess, const Key *sKey) {
-    long *signature_content = encrypt(mess, sKey->val, sKey->n);
-    Signature *res = initSignature(signature_content, strlen(mess));
+Signature* sign(const char* mess, const Key* sKey) {
+    long* signature_content = encrypt(mess, sKey->val, sKey->n);
+    Signature* res = initSignature(signature_content, strlen(mess));
     free(signature_content);
     return res;
 }
 
 // QUESTION 3.8
-char *signature_to_str(Signature *sgn) {
-    char *result = malloc(10 * sgn->length * sizeof(char));
+char* signature_to_str(Signature* sgn) {
+    char* result = malloc(10 * sgn->length * sizeof(char));
     result[0] = '#';
     int pos = 1;
     char buffer[156];
@@ -94,9 +90,9 @@ char *signature_to_str(Signature *sgn) {
     return result;
 }
 
-Signature *str_to_signature(char *str) {
+Signature* str_to_signature(char* str) {
     size_t len = strlen(str);
-    long *content = (long *) malloc(sizeof(long) * len);
+    long* content = (long*) malloc(sizeof(long) * len);
     int num = 0;
     char buffer[256];
     int pos = 0;
@@ -117,7 +113,7 @@ Signature *str_to_signature(char *str) {
     return initSignature(content, num);
 }
 
-void freeSignature(Signature *signature) {
+void freeSignature(Signature* signature) {
     if (signature) {
         free(signature->content);
     }

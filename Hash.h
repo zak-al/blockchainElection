@@ -3,11 +3,9 @@
 
 #include <stdio.h>
 
-typedef unsigned char* hash_t;
-
 unsigned char* duplicateHash(const unsigned char* hash);
 
-int hashEqual(unsigned char* a, unsigned char* b);
+int hashEqual(const unsigned char* a, const unsigned char* b);
 
 void DEBUG_printHashHex(const unsigned char* hash);
 

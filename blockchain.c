@@ -49,30 +49,6 @@ void freeBlockShallow(Block* block) {
  * @param filename Nom du fichier dans lequel écrire. Sera créé si inexistant, écrasé si existant.
  * @param block Le bloc à écrire.
  */
-void _writeBlock(char* filename, Block* block) {
-    FILE* file = fopen(filename, "w");
-    char* authorKeyRepr = keyToStr(block->author);
-    char* prevHStr = hashToStr(block->previous_hash);
-
-    writeHash(block->hash, file);
-    fprintf(file, "/%s/\n", authorKeyRepr);
-    writeHash(block->previous_hash, file);
-    fprintf(file, "/%d", block->nonce);
-
-    free(authorKeyRepr);
-    free(prevHStr);
-
-    CellProtected* current = block->votes;
-    while (current) {
-        char* protectedStr = protectedToStr(current->data);
-        fprintf(file, "/%s", protectedStr);
-        current = current->next;
-        free(protectedStr);
-    }
-
-    fclose(file);
-}
-
 void writeBlock(char* filename, Block* block) {
     FILE* file = fopen(filename, "w");
     char* authorKeyRepr = keyToStr(block->author);
@@ -144,8 +120,7 @@ Block* strToBlock(char* str) {
 
             if (bufferNo == 1) {
                 currentHash = readHash(buffer);
-            }
-            else if (bufferNo == 2) {
+            } else if (bufferNo == 2) {
                 authorKey = strToKey(buffer);
             } else if (bufferNo == 3) {
                 if (strcmp(buffer, "(null)") == 0) {
@@ -192,14 +167,14 @@ int blocksEqual(const Block* b1, const Block* b2) {
     if (!b1 || !b2) return FALSE;
 
     return b1->nonce == b2->nonce
-        && keysEqual(b1->author, b2->author)
-        && (b1->previous_hash == b2->previous_hash
-            || hashEqual(b1->previous_hash,  b2->previous_hash))
-        && cellProtectedEqual(b1->votes, b2->votes);
+           && keysEqual(b1->author, b2->author)
+           && (b1->previous_hash == b2->previous_hash
+               || hashEqual(b1->previous_hash, b2->previous_hash))
+           && cellProtectedEqual(b1->votes, b2->votes);
 }
 
-unsigned char* hashString(const unsigned char* str){
-    return SHA256(str, strlen((char*) str),0);
+unsigned char* hashString(const unsigned char* str) {
+    return SHA256(str, strlen((char*) str), 0);
 }
 
 int startsWithDZeros(const unsigned char* string, int d) {

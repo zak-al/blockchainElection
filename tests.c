@@ -469,7 +469,6 @@ void testArborescence() {
 int main(void) {
     srand(time(NULL));
 
-    //testWriteBlockReadBlock();
     test_voteSimulation();
 
     remove("declarations.txt");

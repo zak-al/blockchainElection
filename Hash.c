@@ -4,15 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-void DEBUG_printHashHex(const unsigned char* hash) {
-    for (int i = 0; i < SHA256_DIGEST_LENGTH; ++i) {
-        printf("%02x", hash[i]);
-    }
-
-    printf("\n");
-}
-
-int hashEqual(unsigned char* a, unsigned char* b) {
+int hashEqual(const unsigned char* a, const unsigned char* b) {
     if (a == b) return TRUE;
     if (!a || !b) return FALSE;
 
@@ -39,6 +31,11 @@ unsigned char* duplicateHash(const unsigned char* hash) {
     return res;
 }
 
+/**
+ * Renvoie une chaîne de caractère caractérisant le hash.
+ * @param hash
+ * @return
+ */
 char* hashToStr(const unsigned char* hash) {
     if (hash == NULL) {
         return strdup("(null)");
@@ -60,6 +57,11 @@ char* hashToStr(const unsigned char* hash) {
     return res;
 }
 
+/**
+ * Écrit la représentation du hash dans le fichier file.
+ * @param hash
+ * @param file
+ */
 void writeHash(const unsigned char* hash, FILE* file) {
     if (!hash) {
         fprintf(file, "(null)");
@@ -73,6 +75,11 @@ void writeHash(const unsigned char* hash, FILE* file) {
     free(str);
 }
 
+/**
+ * Réciproque de hashToStr.
+ * @param hash
+ * @return
+ */
 unsigned char* readHash(const char* hash) {
     unsigned char* res = calloc(SHA256_DIGEST_LENGTH, sizeof(unsigned char));
     if (!res) {

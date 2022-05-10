@@ -16,9 +16,7 @@ int protectedEqual(Protected* p1, Protected* p2);
 
 Protected* initProtected(const Key* votersPublicKey, char* mess, Signature* sgn);
 
-void freeProtected(Protected*
-
-protected);
+void freeProtected(Protected* protected);
 
 char* protectedToStr(Protected* p);
 

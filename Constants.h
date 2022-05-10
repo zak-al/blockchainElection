@@ -1,6 +1,3 @@
-//
-// Created by Zakarie Aloui on 10/05/2022.
-//
 
 #ifndef PROJETSTR_CONSTANTS_H
 #define PROJETSTR_CONSTANTS_H

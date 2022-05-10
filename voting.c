@@ -37,6 +37,15 @@ CellKey* readPublicKeys(char* filename) {
     return list;
 }
 
+/**
+ * Prend un nombre nv d'électeurs et un nombre nc de candidats et génère les fichiers keys.txt, candidats.txt et declarations.txt
+ * contenant respectivement les clés publiques et privées de tous les électeurs, les clés publiques de tous les candidats
+ * et les votes, tirés aléatoirement, de tous les électeurs.
+ * Il est garanti que tous les couples (clé publique, clé privée) sont distincts
+ * et qu'il y a exactement nv électeurs et nc candidats distincts
+ * @param nv
+ * @param nc
+ */
 void generateRandomData(int nv, int nc) {
     FILE* keysFile = fopen("keys.txt", "w+");
     FILE* candidatesFile = fopen("candidates.txt", "w+");
@@ -231,6 +240,13 @@ CellKey* prependKey(Key* key, CellKey* list) {
     return cellKey;
 }
 
+/**
+ * Ajoute protected en tête de list. list n'est pas modifiée, la nouvelle liste est renvoyée.
+ * Si list est vide (nulle) alors protected est renvoyé tel quel.
+ * @param protected
+ * @param list
+ * @return
+ */
 CellProtected* prependProtected(Protected* protected, CellProtected* list) {
     CellProtected* cellProtected = createCellProtected(copyProtected(protected));
     if (!cellProtected) {
@@ -240,35 +256,6 @@ CellProtected* prependProtected(Protected* protected, CellProtected* list) {
 
     cellProtected->next = list;
     return cellProtected;
-}
-
-CellProtected* copyCellProtectedShallow(const CellProtected* cellProtected) {
-    if (cellProtected == NULL) return NULL;
-    CellProtected* copy = malloc(sizeof(CellProtected));
-    if (!copy) {
-        fprintf(stderr, "[copyCellProtectedShallow/copy] Erreur lors de l'allocation de la mémoire :(\n");
-        return NULL;
-    }
-
-    CellProtected* current = copy;
-    while (cellProtected) {
-        current->data = cellProtected->data;
-        if (cellProtected->next != NULL) {
-            current->next = malloc(sizeof(CellProtected));
-            if (!current->next) {
-                fprintf(stderr,
-                        "[copyCellProtectedShallow/current->next] Erreur lors de l'allocation de la mémoire :(\n");
-                deleteCellProtectedShallow(copy);
-                return NULL;
-            }
-
-            current = current->next;
-        } else {
-            return copy;
-        }
-    }
-
-    return copy;
 }
 
 void printListKeys(CellKey* list) {
@@ -289,12 +276,20 @@ void printListProtected(CellProtected* list) {
     }
 }
 
+/**
+ * Supprime cellKey et la clé qu'elle contient.
+ * @param cellKey
+ */
 void deleteCellKey(CellKey* cellKey) {
     if (!cellKey) return;
     freeKey(cellKey->data);
     free(cellKey);
 }
 
+/**
+ * Supprime une liste de clés dans son entièreté : structure comme contenu.
+ * @param cellKey
+ */
 void deleteListKeys(CellKey* cellKey) {
     while (cellKey) {
         CellKey* next = cellKey->next;
@@ -303,7 +298,17 @@ void deleteListKeys(CellKey* cellKey) {
     }
 }
 
+/**
+ * Teste l'égalité entre deux listes de cellules. Deux listes de cellules sont dites égales si les pointeurs
+ * qui les représentent sont égaux ou si elles contiennent exactement les mêmes déclarations, dans le même ordre.
+ * @param one
+ * @param two
+ * @return
+ */
 int cellProtectedEqual(const CellProtected* one, const CellProtected* two) {
+    if (one == two) return TRUE;
+    if (!one || !two) return FALSE;
+
     while (one && two) {
         if (!protectedEqual(one->data, two->data)) {
             return FALSE;
@@ -341,12 +346,19 @@ void deleteCellProtected(CellProtected* cellProtected) {
     free(cellProtected);
 }
 
+/**
+ * Suppression de la structure d'une cellule de déclaration : le contenu n'est pas supprimé.
+ * @param cellProtected
+ */
 void deleteCellProtectedShallow(CellProtected* cellProtected) {
     if (!cellProtected) return;
     free(cellProtected);
 }
 
-
+/**
+ * Supprime une liste de déclarations intégralement : structure et contenu.
+ * @param cellProtected
+ */
 void deleteListProtected(CellProtected* cellProtected) {
     while (cellProtected) {
         CellProtected* next = cellProtected->next;
@@ -355,6 +367,10 @@ void deleteListProtected(CellProtected* cellProtected) {
     }
 }
 
+/**
+ * Supprime la structure d'une liste de déclarations.
+ * @param cellProtected
+ */
 void deleteListProtectedShallow(CellProtected* cellProtected) {
     while (cellProtected) {
         CellProtected* next = cellProtected->next;
@@ -364,6 +380,13 @@ void deleteListProtectedShallow(CellProtected* cellProtected) {
 }
 
 // QUESTION 8.8
+/**
+ * Fusionne l1 et l2. l1 se retrouve avant l2. Les paramètres sont modifiés, et un pointeur vers la liste créée est renvoyé.
+ * Le pointeur renvoyé est égal au pointeur l1 si l1 n'était pas nul. Si l1 est nul, le pointeur renvoyé est égal à l2.
+ * @param l1
+ * @param l2
+ * @return
+ */
 CellProtected* merge(CellProtected* l1, CellProtected* l2) {
     if (!l1) return l2;
     while (l1->next) {
@@ -373,18 +396,16 @@ CellProtected* merge(CellProtected* l1, CellProtected* l2) {
     return l1;
 }
 
-CellProtected* _merge(CellProtected* cp1, CellProtected* cp2) {
-    while (cp2) {
-        prependProtected(cp2->data, cp1);
-        cp2 = cp2->next;
-    }
-    return cp1;
-}
-
 /*
  * =========== EXERCICE 6 ===========
  */
 
+/**
+ * Renvoie une nouvelle liste de déclarations après suppression des déclarations frauduleuses.
+ * Le paramètre est modifié.
+ * @param cellProtected
+ * @return
+ */
 CellProtected* deleteListeFraude(CellProtected* cellProtected) {
     if (!cellProtected) return NULL;
     while (cellProtected && !verify(cellProtected->data)) {
@@ -407,10 +428,18 @@ CellProtected* deleteListeFraude(CellProtected* cellProtected) {
     return orig;
 }
 
+/**
+ * Renvoie le candidat ayant le plus de vois parmi les votes contenus dans declarations.
+ * Vérifie que les électeurs ne votent qu'une seule fois.
+ * NE VÉRIFIE PAS que les déclarations ne sont pas frauduleuses.
+ * @param declarations
+ * @param candidates
+ * @param voters
+ * @param sizeC un entier un peu plus grand que le nombre de candidats, utilisé comme taille d'une table de hachage de candidats avec probing
+ * @param sizeV un entier un peu plus grand que le nombre d'électeurs, utilisé comme taille d'une table de hachage d'électeurs avec probing
+ * @return
+ */
 Key* computeWinner(CellProtected* declarations, CellKey* candidates, CellKey* voters, size_t sizeC, size_t sizeV) {
-    /*
-     * On fait l'hypothèse que les signatures déclarations sont toutes valides.
-     */
     HashTable* candidatesHashTable = htKiCreateHashTable(candidates, sizeC);
     HashTable* votersHashTable = htKiCreateHashTable(voters, sizeV);
 

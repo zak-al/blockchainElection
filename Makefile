@@ -10,7 +10,7 @@ primalite.o: primalite.c primalite.h
 rsa.o: rsa.c rsa.h primalite.c primalite.h
 	gcc -Wall -c rsa.c
 
-voting.o: voting.c voting.h rsa.c rsa.h DEPRECATED_hashset.c DEPRECATED_hashset.h
+voting.o: voting.c voting.h rsa.c rsa.h
 	gcc -Wall -c voting.c
 
 HashTable.o: HashTable.c HashTable.h

@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "rsa.h"
-#include "DEPRECATED_hashset.h"
 #include "Signature.h"
 #include "Protected.h"
 
