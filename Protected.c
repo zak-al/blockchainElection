@@ -6,11 +6,19 @@ int protectedEqual(Protected* p1, Protected* p2) {
            signaturesEqual(p1->signature, p2->signature);
 }
 
-Protected* init_protected(const Key* votersPublicKey, char* mess, Signature* sgn) {
+// QUESTION 3.10
+/**
+ * Alloue dynamiquement une instance de Protected et l'initialise avec les valeurs passées en paramètre.
+ * @param votersPublicKey
+ * @param mess
+ * @param sgn
+ * @return
+ */
+Protected* initProtected(const Key* votersPublicKey, char* mess, Signature* sgn) {
     Protected* result = malloc(sizeof(Protected));
 
     if (!result) {
-        fprintf(stderr, "[init_protected] Erreur lors de l'allocation de Protected :(\n");
+        fprintf(stderr, "[initProtected] Erreur lors de l'allocation de Protected :(\n");
         return NULL;
     }
 
@@ -21,6 +29,12 @@ Protected* init_protected(const Key* votersPublicKey, char* mess, Signature* sgn
     return result;
 }
 
+// QUESTION 3.11
+/**
+ * Renvoie TRUE si la signature contenue dans la déclaration correspond bien au message encodée par l'électeur.
+ * @param pr
+ * @return
+ */
 int verify(Protected* pr) {
     char* decrypted = decrypt(pr->signature->content,
                               pr->signature->length,
@@ -31,18 +45,19 @@ int verify(Protected* pr) {
     return res;
 }
 
-char* protected_to_str(Protected* p) {
+// QUESTION 3.12
+char* protectedToStr(Protected* p) {
     if (p == NULL) {
         return NULL;
     }
 
     char* p_res = malloc(1024 * sizeof(char));
     if (!p_res) {
-        fprintf(stderr, "[protected_to_str] Erreur lors de l'allocation :(\n");
+        fprintf(stderr, "[protectedToStr] Erreur lors de l'allocation :(\n");
         return NULL;
     }
 
-    char* str_key = key_to_str(p->votersPublicKey);
+    char* str_key = keyToStr(p->votersPublicKey);
     char* str_sgn = signature_to_str(p->signature);
 
     sprintf(p_res, "%s:%s:%s", str_key, p->message, str_sgn);
@@ -55,16 +70,16 @@ char* protected_to_str(Protected* p) {
     return p_res;
 }
 
-Protected* str_to_protected(char* str) {
+Protected* strToProtected(char* str) {
     char str_key[256];
     char str_sgn[256];
     char str_msg[256];
     sscanf(str, "%[^:]:%[^:]:%s", str_key, str_msg, str_sgn);
 
-    Key* key = str_to_key(str_key);
+    Key* key = strToKey(str_key);
     Signature* sgn = str_to_signature(str_sgn);
 
-    Protected* res = init_protected(key, str_msg, sgn);
+    Protected* res = initProtected(key, str_msg, sgn);
 
     freeKey(key);
     freeSignature(sgn);
@@ -73,11 +88,11 @@ Protected* str_to_protected(char* str) {
 }
 
 void freeProtected(Protected* protected) {
-    if (protected) {
-        free(protected->message);
-        freeSignature(protected->signature);
-        freeKey(protected->votersPublicKey);
-    }
+    if (!protected) return;
+
+    free(protected->message);
+    freeSignature(protected->signature);
+    freeKey(protected->votersPublicKey);
 
     free(protected);
 }

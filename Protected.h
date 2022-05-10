@@ -5,25 +5,25 @@
 #include "Signature.h"
 
 typedef struct {
-    Key *votersPublicKey;
-    char *message;
-    Signature *signature;
+    Key* votersPublicKey;
+    char* message;
+    Signature* signature;
 } Protected;
 
-Protected *copyProtected(Protected *protected);
+Protected* copyProtected(Protected* protected);
 
-int protectedEqual(Protected *p1, Protected *p2);
+int protectedEqual(Protected* p1, Protected* p2);
 
-Protected *init_protected(const Key* votersPublicKey, char *mess, Signature *sgn);
+Protected* initProtected(const Key* votersPublicKey, char* mess, Signature* sgn);
 
-void freeProtected(Protected *
+void freeProtected(Protected*
 
 protected);
 
-char *protected_to_str(Protected *p);
+char* protectedToStr(Protected* p);
 
-Protected *str_to_protected(char *str);
+Protected* strToProtected(char* str);
 
-int verify(Protected *pr);
+int verify(Protected* pr);
 
 #endif //PROJETSTR_PROTECTED_H

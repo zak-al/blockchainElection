@@ -41,6 +41,13 @@ int signaturesEqual(Signature *s1, Signature *s2) {
     return TRUE;
 }
 
+// QUESTION 3.6
+/**
+ * Alloue une instance de Signature et l'initialise avec les valeurs passées en paramètre.
+ * @param content
+ * @param size
+ * @return
+ */
 Signature *initSignature(const long *content, size_t size) {
     Signature *signature = malloc(sizeof(Signature));
     if (!signature) {
@@ -58,6 +65,7 @@ Signature *copySignature(Signature *signature) {
     return initSignature(signature->content, signature->length);
 }
 
+// QUESTION 3.7
 Signature *sign(const char *mess, const Key *sKey) {
     long *signature_content = encrypt(mess, sKey->val, sKey->n);
     Signature *res = initSignature(signature_content, strlen(mess));
@@ -65,6 +73,7 @@ Signature *sign(const char *mess, const Key *sKey) {
     return res;
 }
 
+// QUESTION 3.8
 char *signature_to_str(Signature *sgn) {
     char *result = malloc(10 * sgn->length * sizeof(char));
     result[0] = '#';

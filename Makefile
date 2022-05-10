@@ -1,5 +1,5 @@
-tests: tests.o voting.o HashTable.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o DEPRECATED_hashset.o Arborescence.o
-	gcc -Wall tests.o voting.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o DEPRECATED_hashset.o Arborescence.o -o tests -lssl -lcrypto
+tests: tests.o voting.o HashTable.o rsa.o primalite.o Protected.o Signature.o blockchain.o Arborescence.o Simulation.o Hash.o
+	gcc -Wall tests.o voting.o rsa.o primalite.o HashTable.o Protected.o Signature.o blockchain.o Arborescence.o Simulation.o Hash.o -o tests -lssl -lcrypto
 
 tests.o: tests.c voting.c
 	gcc -Wall -c tests.c
@@ -28,8 +28,11 @@ blockchain.o: blockchain.c blockchain.h
 Arborescence.o: Arborescence.c Arborescence.h
 	gcc -Wall -c Arborescence.c
 
-DEPRECATED_hashset.o: DEPRECATED_hashset.c DEPRECATED_hashset.h
-	gcc -Wall -c DEPRECATED_hashset.c
+Simulation.o: Simulation.c Simulation.h
+	gcc -Wall -c Simulation.c
+
+Hash.o: Hash.c Hash.h
+	gcc -Wall -c Hash.c
 
 clean:
 	rm -rf *.o

@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "primalite.h"
 
-int is_prime_naive(long p) {
+int isPrimeNaive(long p) {
     if (p < 2) {
         return FALSE;
     }
@@ -17,7 +17,7 @@ int is_prime_naive(long p) {
     return TRUE;
 }
 
-long modpow_naive(long base, long exponent, long n) {
+long modpowNaive(long base, long exponent, long n) {
     long res = 1;
     while (exponent > 0) {
         res = (res * base) mod n;
@@ -57,11 +57,11 @@ int witness(long a, long b, long d, long p) {
     return 1;
 }
 
-long rand_long(long low, long up) {
+long randLong(long low, long up) {
     return rand() % (up - low + 1) + low;
 }
 
-int is_prime_miller(long p, int k) {
+int isPrimeMiller(long p, int k) {
     if (p == 2) {
         return 1;
     }
@@ -80,7 +80,7 @@ int is_prime_miller(long p, int k) {
     long a;
     int i;
     for (i = 0; i < k; ++i) {
-        a = rand_long(2, p - 1);
+        a = randLong(2, p - 1);
         if (witness(a, b, d, p)) {
             return 0;
         }
@@ -88,7 +88,7 @@ int is_prime_miller(long p, int k) {
     return 1;
 }
 
-long random_prime_number(int low_size, int up_size, int k) {
+long randomPrimeNumber(int low_size, int up_size, int k) {
     long lo, hi;
     if (up_size > 30) up_size = 30;
     if (low_size > up_size) low_size = up_size;
@@ -97,8 +97,8 @@ long random_prime_number(int low_size, int up_size, int k) {
 
     long p;
     do {
-        p = rand_long(lo, hi);
-    } while (!is_prime_miller(p, k));
+        p = randLong(lo, hi);
+    } while (!isPrimeMiller(p, k));
 
     return p;
 }

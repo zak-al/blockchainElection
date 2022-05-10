@@ -1,8 +1,23 @@
 #include "Arborescence.h"
+#include "Hash.h"
 
+// QUESTION 8.1
+/**
+ * @brief Alloue la mémoire pour une instance de cellTree et l'initialise avec le bloc passé en paramètre.
+ * Le bloc passé en paramètre est copié.
+ * @param b
+ * @return
+ */
 CellTree* createNode(Block* b) {
     CellTree* cellTree = malloc(sizeof(CellTree));
-    cellTree->block = copyBlock(b);
+
+    if (!cellTree) {
+        fprintf(stderr, "[createNode] Erreur lors de l'allocation de la mémoire :(");
+        return NULL;
+    }
+
+    cellTree->block = b;
+
     cellTree->firstChild = NULL;
     cellTree->height = 0;
     cellTree->nextBro = NULL;
@@ -11,53 +26,100 @@ CellTree* createNode(Block* b) {
     return cellTree;
 }
 
+// QUESTION 8.2
+/**
+ * @brief Met à jour la hauteur de parent après éventuelle augmentation de la hauteur de child.
+ * @param parent
+ * @param child
+ * @return
+ */
 int updateHeight(CellTree* parent, CellTree* child) {
-    if(child->height + 1 > parent->height){
+    if (child->height + 1 > parent->height){
         parent->height = child->height + 1;
-        return 1;
+        return TRUE;
     }
-    return 0;
+    return FALSE;
 }
 
-void addChild(CellTree* parent,CellTree* child){
+// QUESTION 8.3
+/**
+ * Ajoute child comme premier fils du parent et met à jour la hauteur des nœuds ascendants.
+ * @param parent
+ * @param child
+ */
+void addChild(CellTree* parent, CellTree* child) {
     child->parent = parent;
     child->nextBro = parent->firstChild;
     parent->firstChild = child;
-    updateHeight(parent, child);
+
+    CellTree* c = child;
+    while (c->parent) {
+        // Si la hauteur d'un parent n'a pas changé alors la hauteur de ses ascendants restera inchangée également.
+        if (!updateHeight(c->parent, c)) {
+            break;
+        }
+        c = c->parent;
+    }
 }
 
+// QUESTION 8.4
 void printTree(CellTree* cellTree) {
-    printf("La hauteur est %d, la veleur hachée est %s", cellTree->height, cellTree->block->hash);
+    if (!cellTree) return;
+    printf("< Hauteur : %d ; hash du bloc : ", cellTree->height);
+    writeHash(cellTree->block->hash, stdout);
+    printf(">\n");
 
-    if(cellTree->nextBro){
-        printTree(cellTree->nextBro);
-    }
-    if(cellTree->firstChild){
-        printTree(cellTree->firstChild);
-    }
+    printTree(cellTree->nextBro);
+    printTree(cellTree->firstChild);
 }
 
-void deleteNode(CellTree* node){
-    freeBlock(node->block);
+// QUESTION 8.5
+/**
+ * @brief Supprime la mémoire associée à un nœud, i.e. le nœud lui-même et le bloc auquel il fait référence.
+ * Ne supprime pas les nœuds adjacents
+ * @param node
+ */
+void deleteNode(CellTree* node) {
+    freeBlockShallow(node->block);
     free(node);
 }
 
+// QUESTION 8.5 bis
+void deleteCellTree(CellTree* cellTree) {
+    if (cellTree == NULL) return;
+    deleteCellTree(cellTree->nextBro);
+    deleteCellTree(cellTree->firstChild);
 
-void deleteCellTree(CellTree* cellTree){
-    if(cellTree->nextBro){
-        deleteCellTree(cellTree->nextBro);
-    }
-    if(cellTree->firstChild){
-        deleteCellTree(cellTree->firstChild);
-    }
     deleteNode(cellTree);
 }
 
-CellTree* highestChild(CellTree* cellTree) {
+// QUESTION 8.6
+/**
+ * @brief Calcule le fils de cellTree avec la hauteur maximale.
+ * @param cellTree
+ * @return
+ */
+CellTree* highestChild(const CellTree* cellTree) {
+    int max = -1;
+    CellTree* argMax = NULL;
+    CellTree* child = cellTree->firstChild;
+
+    while (child) {
+        if (child->height > max) {
+            max = child->height;
+            argMax = child;
+        }
+        child = child->nextBro;
+    }
+
+    return argMax;
+}
+
+CellTree* DEPRECATED_highestChild(CellTree* cellTree) {
     int max = -1;
     CellTree* high;
 
-    if(cellTree -> firstChild){
+    if(cellTree -> firstChild) {
         CellTree* t = cellTree -> firstChild;
         CellTree* bro = t;
         while(bro -> nextBro){
@@ -73,113 +135,40 @@ CellTree* highestChild(CellTree* cellTree) {
     return NULL;
 }
 
-CellTree* lastNode(CellTree* cellTree){
-    CellTree* res = cellTree;
+// QUESTION 8.7
+/**
+ * @brief Renvoie la valeur hachée de descendant le plus lointain de cellTree.
+ * @param cellTree
+ * @return
+ */
+unsigned char* lastNode(const CellTree* cellTree) {
+    const CellTree* res = cellTree;
     while(res->firstChild){
         res = highestChild(res);
     }
-    return res;
+
+    return res->block->hash;
 }
 
-CellProtected* fusionner(CellProtected* cp1, CellProtected* cp2){
-    while (cp2) {
-        prependProtected(cp2->data, cp1);
-        cp2 = cp2->next;
-    }
-    return cp1;
-}
-
-CellProtected* declarationLongest(CellTree* cellTree){
+// QUESTION 8.8
+CellProtected* buildLongestDeclarationChain(CellTree* cellTree) {
     CellProtected *res = cellTree->block->votes;
     cellTree = highestChild(cellTree);
-    while (cellTree){
-        res = fusionner(res, cellTree->block->votes);
+    while (cellTree) {
+        res = merge(res, cellTree->block->votes);
         cellTree = highestChild(cellTree);
     }
     return res;
 }
 
-void submit_vote(Protected* p) {
-    FILE* fic = fopen("Pending_votes.txt", "w+");
-    if (fic == NULL){
-        fprintf(stderr, "Erreur lors de l'ouverture du fichier.\n");
+void addChildOnLongestChain(CellTree* cellTree, CellTree* node) {
+    if (!cellTree) {
+        return;
     }
 
-    char* str = protected_to_str(p);
-
-    fprintf(fic, "%s", str);
-
-    free(str);
-    fclose(fic);
-}
-
-void create_block(CellTree* cellTree, Key* author, int d){
-    Block* b = malloc(sizeof(Block));
-
-    Key* a = malloc(sizeof(Key));
-    init_key(a, author -> val, author -> n);
-    b -> author = a;
-
-    CellProtected* cellProtected = read_protected("Pending_votes.txt");
-    b -> votes = cellProtected;
-
-    remove("Pending_votes.txt");
-
-    b -> previous_hash = (unsigned char *) strdup((const char *) cellTree->block->hash);
-
-    b -> nonce = 0;
-    //compute_proof_of_work(b, d);
-
-    unsigned char* str = blockToStr(b);
-    unsigned char* hash = strToHash(str);
-    b -> hash = (unsigned char *)strdup((char*) hash);
-
-    free(str);
-    free(hash);
-
-    writeBlock("Pending_block.txt",b);
-
-    delete_list_protected(cellProtected);
-    freeBlock(b);
-}
-
-void add_block(int d, char* name){
-    FILE* fic = fopen("Pending_block.txt", "r+");
-
-    char* str = NULL;
-
-    // todo
-    fgets(str, 5000, fic);
-    Block* b = strToBlock(str);
-
-    if(verify_block(b, d)){
-        FILE* f = fopen(name, "w");
-
-        char* key = key_to_str(b -> author);
-
-        fprintf(f, "%s\n", key);
-        fprintf(f, "%s\n", b->hash);
-        fprintf(f, "%s\n", b -> previous_hash);
-        fprintf(f, "%d\n", b -> nonce);
-
-        CellProtected* current = b -> votes;
-
-        while(current != NULL){
-            char* pr = protected_to_str(current -> data);
-
-            fprintf(f, "%s", pr);
-            current = current -> next;
-
-            free(pr);
-        }
-
-        free(key);
-        fclose(f);
+    while (cellTree->firstChild) {
+        cellTree = highestChild(cellTree);
     }
 
-
-    delete_list_protected(b -> votes);
-    freeBlock(b);
-
-    remove("Pending_block.txt");
+    addChild(cellTree, node);
 }

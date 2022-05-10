@@ -1,53 +1,7 @@
 #include <stdio.h>
 #include "rsa.h"
 
-/**
- * @brief Tests if two keys have the same values.
- * @param x A key
- * @param y A key
- * @return an integer representing true if x and y are equal, false otherwise.
- */
-int keysEqual(const Key* x, const Key* y) {
-    return (x->n == y->n && x->val == y->val);
-}
-
-/**
- * @brief Copies a key.
- * @param key A key.
- * @return A dynamically-allocated copy of `key`.
- */
-Key *copyKey(const Key *key) {
-    Key *copy = malloc(sizeof(Key));
-    if (!copy) {
-        fprintf(stderr, "[copyKey] Erreur lors l'allocation :(\n");
-        return NULL;
-    }
-
-    copy->n = key->n;
-    copy->val = key->val;
-    return copy;
-}
-
-size_t max(long x, long y) {
-    return x < y ? y : x;
-}
-
-long extended_gcd(long s, long t, long *u, long *v) {
-    if (s == 0) {
-        *u = 0;
-        *v = 1;
-        return t;
-    }
-
-    long uPrim, vPrim;
-    long gcd = extended_gcd(t mod s, s, &uPrim, &vPrim);
-
-    *u = vPrim - (t / s) * uPrim;
-    *v = uPrim;
-
-    return gcd;
-}
-
+// QUESTION 2.1
 /**
  * \~french
  * @brief Forme la clé publique (s, n) et la clé privée (u, n) en fonction de deux nombres premiers p et q.
@@ -64,14 +18,14 @@ long extended_gcd(long s, long t, long *u, long *v) {
  * @param s pointer that is to take the parameter s of the public key
  * @param u pointer that is to take the parameter u of the private key, i.e. the multiplicative inverse of s modulo n
  */
-void generate_key_values(long p, long q, long *n, long *s, long *u) {
+void generateKeyValues(long p, long q, long *n, long *s, long *u) {
     *n = p * q;
     long t = (p - 1) * (q - 1);
     long _s;
     long _ = 0;
     do {
-        _s = rand_long(0, t);
-    } while (extended_gcd(_s, t, u, &_) != 1);
+        _s = randLong(0, t);
+    } while (extendedGcd(_s, t, u, &_) != 1);
 
     *s = _s;
 
@@ -80,6 +34,7 @@ void generate_key_values(long p, long q, long *n, long *s, long *u) {
     }
 }
 
+// QUESTION 2.2
 /**
  * \~french
  * @brief Chiffre une chaîne de caractères
@@ -111,6 +66,7 @@ long *encrypt(const char *string, long s, long n) {
     return res;
 }
 
+// QUESTION 2.3
 /**
  * \~french
  * @brief Déchiffre une chaîne de caractères
@@ -145,51 +101,110 @@ char *decrypt(const long *string, size_t size, long u, long n) {
     return res;
 }
 
-void init_key(Key *key, long val, long n) {
+// QUESTION 3.2
+/**
+ * Initialise une clé déjà allouée avec les valeurs passées en paramètre.
+ * @param key
+ * @param val
+ * @param n
+ */
+void initKey(Key *key, long val, long n) {
     key->val = val;
     key->n = n;
 }
 
-void init_pair_keys(Key *pKey, Key *sKey, int low_size, int up_size) {
-    long pub_val, priv_val, n;
-    long p = random_prime_number(low_size, up_size, 5);
-    long q;
-    do {
-        q = random_prime_number(3, 7, 5000);
-    } while (q == p);
-
-    generate_key_values(p, q, &n, &pub_val, &priv_val);
-    init_key(pKey, pub_val, n);
-    init_key(sKey, priv_val, n);
+/**
+ * @brief Teste l'égalité champ à champ entre deux clés.
+ * Si les deux pointeurs sont nuls alors la fonction renvoie TRUE.
+ * @param x
+ * @param y
+ */
+int keysEqual(const Key* x, const Key* y) {
+    if (x == y) return TRUE;
+    return (x->n == y->n && x->val == y->val);
 }
 
-char *key_to_str(Key *key) {
-    char *repr = malloc((max(key->n / 16 + 1, key->val / 16 + 1) + 5) * 2);
+/**
+ * @brief Copies a key.
+ * @param key A key.
+ * @return A dynamically-allocated copy of `key`.
+ */
+Key *copyKey(const Key *key) {
+    Key *copy = malloc(sizeof(Key));
+    if (!copy) {
+        fprintf(stderr, "[copyKey] Erreur lors l'allocation :(\n");
+        return NULL;
+    }
+
+    copy->n = key->n;
+    copy->val = key->val;
+    return copy;
+}
+
+// QUESTION 3.3
+/**
+ * Initialise un couple (clé publique, clé privée) avec des valeurs appropriées, choisies aléatoirement.
+ * @param pKey
+ * @param sKey
+ * @param low_size Minimum de bits dans les paramètres des clés.
+ * @param up_size Maximum de bits dans les paramètre des clés.
+ */
+void initPairKeys(Key *pKey, Key *sKey, int low_size, int up_size) {
+    long pub_val, priv_val, n;
+    long p = randomPrimeNumber(low_size, up_size, 5);
+    long q;
+    do {
+        q = randomPrimeNumber(3, 7, 5000);
+    } while (q == p);
+
+    generateKeyValues(p, q, &n, &pub_val, &priv_val);
+    initKey(pKey, pub_val, n);
+    initKey(sKey, priv_val, n);
+}
+
+// QUESTION 3.4
+char *keyToStr(Key *key) {
+    char *repr = malloc(64);
     if (!repr) {
-        fprintf(stderr, "[key_to_str] Erreur lors l'allocation de la représentation de la clé :(\n");
+        fprintf(stderr, "[keyToStr] Erreur lors l'allocation de la représentation de la clé :(\n");
         return NULL;
     }
 
     sprintf(repr, "(%lx, %lx)", key->val, key->n);
     repr = realloc(repr, (strlen(repr) + 1) * sizeof(char));
-
     return repr;
 }
 
-Key *str_to_key(char *repr) {
+Key *strToKey(char *repr) {
     long val, n;
     sscanf(repr, "(%lx, %lx)", &val, &n);
     Key *key = malloc(sizeof(Key));
     if (!key) {
-        fprintf(stderr, "[str_to_key] Erreur lors l'allocation de la clé :(\n");
+        fprintf(stderr, "[strToKey] Erreur lors l'allocation de la clé :(\n");
         return NULL;
     }
 
-    init_key(key, val, n);
+    initKey(key, val, n);
     return key;
 }
 
+long extendedGcd(long s, long t, long *u, long *v) {
+    if (s == 0) {
+        *u = 0;
+        *v = 1;
+        return t;
+    }
+
+    long uPrim, vPrim;
+    long gcd = extendedGcd(t mod s, s, &uPrim, &vPrim);
+
+    *u = vPrim - (t / s) * uPrim;
+    *v = uPrim;
+
+    return gcd;
+}
+
+
 void freeKey(Key *key) {
-    printf("============ DEBUG FREE KEY %p ============\n", key);
     free(key);
 }

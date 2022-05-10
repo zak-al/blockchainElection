@@ -5,20 +5,18 @@
 #define FALSE (!TRUE)
 #define mod %
 
-int is_prime_naive(long p);
+int isPrimeNaive(long p);
 
-long modpow_naive(long base, long exponent, long n);
+long modpowNaive(long base, long exponent, long n);
 
 long modpow(long base, long exponent, long n);
 
 int witness(long a, long b, long d, long p);
 
-long rand_long(long low, long up);
+long randLong(long low, long up);
 
-int is_prime_miller(long p, int k);
+int isPrimeMiller(long p, int k);
 
-long random_prime_number(int low_size, int up_size, int k);
-
-long long next_prime(long long from);
+long randomPrimeNumber(int low_size, int up_size, int k);
 
 #endif //PROJETSTR_PRIMALITE_H
